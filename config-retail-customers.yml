@@ -1,0 +1,80 @@
+version: v1
+name: wf-customers
+type: workflow
+tags:
+  - demo.customers
+description: The job ingests retail customers data from Blob Storage to icebase
+workflow:
+  title: Connect retail customers
+  dag:
+    - name: retail-customers
+      title: retail-customers Dataset
+      spec:
+        tags:
+          - demo.customers
+        stack: flare:3.0
+        compute: runnable-default
+        flare:
+          driver:
+            coreLimit: 1100m
+            cores: 1
+            memory: 1048m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1
+            memory: 1000m 
+          job:
+            explain: true
+            inputs:
+              - name: customers
+                dataset: dataos://thirdparty01:customer_retail_demo/customers.csv?acl=rw                       
+                format: csv
+            logLevel: INFO
+            outputs:
+              - name: final
+                dataset: dataos://icebase:retail_accelerator/customers?acl=rw
+                format: Iceberg
+                description: This dataset gives you details of all retail customers and their corresponding attributes.
+                tags:
+                  - demo.customers
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+                title: retail customers Source Data
+            steps:
+              - sequence:
+                  - name: final
+                    sql: select * from customers limit 5600
+                    functions:
+                       - name: any_timestamp
+                         column: birth_date
+                         asColumn: birth_date
+                       - name: any_timestamp
+                         column: register_date
+                         asColumn: register_date
+                       - name: drop_duplicates 
+                         columns: 
+                          - email_id
+                       - name: set_type
+                         columns:
+                          age: int
+                          number_of_children: int
+                       - name: cleanse_column_names
+                       - name: change_column_case
+                         case: lower
+                       
+    - name: dt-retail-customers
+      spec:
+        stack: toolbox
+        compute: runnable-default
+        toolbox:
+          dataset: dataos://icebase:retail_accelerator/customers?acl=rw
+          action:
+            name: set_version
+            value: latest
+      dependencies:
+        - retail-customers
