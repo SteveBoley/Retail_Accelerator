@@ -1,0 +1,52 @@
+version: v1
+name: wf-quality-prod-subcategory
+type: workflow
+tags:
+  - demo.retail
+description: The job performs metrics calculations and checks on product subcategory data
+workflow:
+  title: Metrics and checks
+  dag:
+    - name: quality-product-subcategory
+      title: Metrics and checks
+      description: The job performs metrics calculations and checks product subcategory data
+      spec:
+        stack: flare:3.0
+        compute: runnable-default
+        tags:
+          - Metrics
+        title: Metrics and checks
+        description: The job performs metrics calculations and checks on product subcategory data
+        flare:
+          job:
+            explain: true
+            logLevel: INFO
+            inputs:
+              - name: source
+                dataset:  dataos://icebasedev:retail_accelerator/product_subcategory
+                format: iceberg
+
+            assertions:
+              - column: product_subcategory
+                validFormat:
+                  regex: /[a-zA-Z]+/g
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_subcategory_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_category_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0

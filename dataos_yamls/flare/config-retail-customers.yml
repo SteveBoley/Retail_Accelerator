@@ -33,7 +33,7 @@ workflow:
             logLevel: INFO
             outputs:
               - name: final
-                dataset: dataos://icebase:retail_accelerator/customers?acl=rw
+                dataset: dataos://icebasedev:retail_accelerator/customers?acl=rw
                 format: Iceberg
                 description: This dataset gives you details of all retail customers and their corresponding attributes.
                 tags:
@@ -72,7 +72,7 @@ workflow:
         stack: toolbox
         compute: runnable-default
         toolbox:
-          dataset: dataos://icebase:retail_accelerator/customers?acl=rw
+          dataset: dataos://icebasedev:retail_accelerator/customers?acl=rw
           action:
             name: set_version
             value: latest

@@ -1,0 +1,14 @@
+version: v1
+name: dataos-tool-profile
+type: workflow
+workflow:
+  dag:
+    - name: city-profile-data-tool
+      spec:
+        stack: toolbox
+        compute: runnable-default
+        toolbox:
+          dataset: dataos://icebasedev:thirdparty01/profiles?acl=rw
+          action:
+            name: set_version
+            value: latest
