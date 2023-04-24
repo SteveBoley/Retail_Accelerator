@@ -1,0 +1,140 @@
+version: v1
+name: wf-quality-product
+type: workflow
+tags:
+  - demo.customer
+description: The job performs metrics calculations and checks on product data
+workflow:
+  title: Metrics and checks
+  dag:
+    - name: quality-product
+      title: Metrics and checks
+      description: The job performs metrics calculations and checks on product data
+      spec:
+        stack: flare:3.0
+        compute: runnable-default
+        tags:
+          - Metrics
+        title: Metrics and checks
+        description: The job performs metrics calculations and checks on product data
+        flare:
+          job:
+            explain: true
+            logLevel: INFO
+            inputs:
+              - name: source
+                dataset:  dataos://icebasedev:retail_accelerator/product
+                format: iceberg
+
+            assertions:
+              - column: sku_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_category_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_count == 0
+                  - invalid_count > 10
+
+              - column: product_subcategory_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_count == 0
+                  - invalid_count < 10
+
+              - column: model_name
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: model_id
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: brand_id
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_name
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_color
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_count <= 0
+
+              - column: product_size
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+                  
+              - column: product_description
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: unique_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: list_price
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: cost_price
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: sale_price
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              #- column: launched_ts
+               # validFormat:
+                #  regex: [0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]
+                #tests: 
+                 # - missing_percentage == 0
+                  #- missing_count <= 0

@@ -1,0 +1,38 @@
+version: v1
+name: wf-prod-category-profile
+type: workflow
+tags:
+  - demo.prod-category
+workflow:
+  title: Connect product-category
+  dag:
+  - name: product-category-profile-profile
+    title: product-category profile Profiler
+    description: The job performs profiling on the product category data
+    spec:
+      stack: flare:3.0
+      compute: runnable-default
+      tier: system
+      title: product-category Profiler
+      persistentVolume:
+        name: persistent-v
+        directory: fides
+      flare:
+        driver:
+          coreLimit: 1100m
+          cores: 1
+          memory: 1048m
+        executor:
+          coreLimit: 1200m
+          cores: 1
+          instances: 1
+          memory: 1000m 
+        job:
+          explain: true
+          inputs:
+            - name: product_category
+              dataset:  dataos://icebasedev:retail_accelerator/product_category
+              format: iceberg
+          logLevel: INFO
+          profile:
+            level: basic

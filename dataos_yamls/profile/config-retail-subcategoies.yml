@@ -1,0 +1,38 @@
+version: v1
+name: wf-prod-subcategory-profile
+type: workflow
+tags:
+  - demo.prod-subcategory
+workflow:
+  title: Connect product-subcategory
+  dag:
+  - name: product-subcategory-profile-profile
+    title: product-category profile Profiler
+    description: The job performs profiling on the product subcategory data
+    spec:
+      stack: flare:3.0
+      compute: runnable-default
+      tier: system
+      title: product-subcategory Profiler
+      persistentVolume:
+        name: persistent-v
+        directory: fides
+      flare:
+        driver:
+          coreLimit: 1100m
+          cores: 1
+          memory: 1048m
+        executor:
+          coreLimit: 1200m
+          cores: 1
+          instances: 1
+          memory: 1000m 
+        job:
+          explain: true
+          inputs:
+            - name: product_subcategory
+              dataset:  dataos://icebasedev:retail_accelerator/product_subcategory
+              format: iceberg
+          logLevel: INFO
+          profile:
+            level: basic
