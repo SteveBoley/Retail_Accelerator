@@ -33,88 +33,80 @@ workflow:
                   - missing_percentage == 0
                   - missing_count <= 0
 
-              - column: first_name
-                validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests:
-                  - missing_count == 0
-                  - invalid_count > 10
-
-              - column: last_name
-                validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests:
-                  - missing_count == 0
-                  - invalid_count < 10
-
-              - column: gender
-                tests:
-                  - duplicate_count == 0
-                  - missing_percentage == 0
-                  - missing_count <= 0
 
               - column: phone_number
                 validFormat:
-                  regex: \([1-9][0-9]{2}\)[ ][1-9]{3}[-][0-9]{4}
+                  regex: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
                 tests:
                   - duplicate_count == 0
                   - missing_percentage == 0
-                  - missing_count <= 0
+                  - missing_count == 0
 
               - column: email_id
                 validFormat:
-                  regex: /^([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})$/i
+                  regex: ([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|"([]!#-[^-~ \t]|(\\[\t -~]))+")@([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])
                 tests: 
                   - duplicate_count == 0
                   - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: birth_date
-                validFormat:
-                  regex: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
-                tests:
-                  - missing_percentage == 0
-                  - missing_count <= 0
+                  - missing_count == 0
 
               - column: age
                 validFormat:
-                  regex: /\d/g
+                  regex: ^[1-9]+[0-9]*$
                 tests:
                   - missing_percentage == 0
                   - missing_count <= 0
 
+              - column: gender
+                validFormat:
+                  regex: (?:'MALE'|'FEMALE')
+                tests:
+                  - missing_count <= 0
+
+              - column: last_name
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests:
+                  - missing_count == 0
+
+              - column: first_name
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests:
+                  - missing_count == 0
+
               - column: education_level
                 validFormat:
-                  regex: /[a-zA-Z]+/g
+                  regex: ^[a-zA-Z][0-9a-zA-Z .,'-]*$
                 tests:
                   - missing_percentage == 0
                   - missing_count <= 0
 
               - column: marital_status
                 validFormat:
-                  regex: /[a-zA-Z]+/g
+                  regex: ^[a-zA-Z][0-9a-zA-Z .,'-]*$
                 tests:
                   - missing_percentage == 0
                   - missing_count <= 0
-                  
-              - column: number_of_children
-                validFormat: 
-                  regex: /\d/g
+
+              - column: country
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+            
+              - column: state
+                validFormat:
+                  regex: ^[a-zA-Z]
                 tests: 
                   - missing_percentage == 0
                   - missing_count <= 0
 
-              - column: register_date
+              - column: city
                 validFormat:
-                  regex: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+                  regex: ^[a-zA-Z]
                 tests: 
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: occupation
-                validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests:
                   - missing_percentage == 0
                   - missing_count <= 0
 
@@ -125,65 +117,24 @@ workflow:
                   - missing_percentage == 0
                   - missing_count <= 0
 
-
-              - column: hobbies
-                validFormat:
-                  regex: /[a-zA-Z]+/g
+              - column: number_of_children
+                validFormat: 
+                  regex: ^[1-9]+[0-9]*$
                 tests: 
                   - missing_percentage == 0
                   - missing_count <= 0
 
-              - column: degree_of_loyalty
+              - column: phone_number
                 validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests: 
+                  regex: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
+                tests:
+                  - duplicate_count == 0
                   - missing_percentage == 0
-                  - missing_count <= 0
+                  - missing_count == 0  
 
-              - column: social_class
+              - column: birth_date
                 validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests: 
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: mailing_street
-                validFormat:
-                  regex: ^[a-zA-Z0-9_.-]*$
-                tests: 
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: city
-                validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests: 
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: state
-                validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests: 
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: country
-                validFormat:
-                  regex: /[a-zA-Z]+/g
-                tests: 
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: zip_code
-                validFormat:
-                  regex: ^[a-zA-Z0-9_.-]*$
+                  regex: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
                 tests:
                   - missing_percentage == 0
                   - missing_count <= 0
-
-
-
-
-
-                  
