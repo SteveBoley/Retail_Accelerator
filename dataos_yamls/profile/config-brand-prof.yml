@@ -1,0 +1,38 @@
+version: v1
+name: wf-brand-profile
+type: workflow
+tags:
+  - demo.brand
+workflow:
+  title: Connect brand
+  dag:
+  - name: brand-profile-profile
+    title: brand profile Profiler
+    description: The job performs profiling on the brand data
+    spec:
+      stack: flare:3.0
+      compute: runnable-default
+      tier: system
+      title: brand Profiler
+      persistentVolume:
+        name: persistent-v
+        directory: fides
+      flare:
+        driver:
+          coreLimit: 1100m
+          cores: 1
+          memory: 1048m
+        executor:
+          coreLimit: 1200m
+          cores: 1
+          instances: 1
+          memory: 1000m 
+        job:
+          explain: true
+          inputs:
+            - name: brand
+              dataset:  dataos://icebasedev:retail_accelerator/brand
+              format: iceberg
+          logLevel: INFO
+          profile:
+            level: basic
