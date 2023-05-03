@@ -1,0 +1,22 @@
+input:
+  http_client:
+    url: https://api.openweathermap.org/data/2.5/weather?q=Rajasthan&appid=8b502954a629d709d6ec5d52e5e54722
+    verb: GET
+    timeout: 500s
+    headers:
+      Content-Type: application/octet-stream
+    oauth:
+      enabled: true
+      access_token: 8b502954a629d709d6ec5d52e5e54722
+# pipeline:
+#   processors:
+#     - bloblang: meta status_code = 200
+
+#     - log:
+#         level: DEBUG
+#         message: "received message: ${!meta()}"
+#     - log:
+#         level: INFO
+#         message: 'payload: ${! json() }'
+output:
+  stdout: {} 
