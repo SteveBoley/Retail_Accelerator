@@ -1,0 +1,86 @@
+version: v1
+name: wf-quality-brand
+type: workflow
+tags:
+  - demo.brand
+description: The job performs metrics calculations and checks on brand data
+workflow:
+  title: Metrics and checks
+  dag:
+    - name: quality-brand
+      title: Metrics and checks
+      description: The job performs metrics calculations and checks on brand data
+      spec:
+        stack: flare:3.0
+        compute: runnable-default
+        tags:
+          - Metrics
+        title: Metrics and checks
+        description: The job performs metrics calculations and checks on brand data
+        flare:
+          job:
+            explain: true
+            logLevel: INFO
+            inputs:
+              - name: source
+                dataset:  dataos://icebasedev:retail_accelerator/brand
+                format: iceberg
+
+            assertions:
+              - column: brand_id
+                validFormat:
+                  regex: ^[0-9_.-]*$ 
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: brand_name
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests:
+                  - duplicate_count == 0
+                  - missing_count == 0
+                  - invalid_count > 10
+
+              - column: parent_company
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests:
+                  - missing_count == 0
+                  - invalid_count > 10
+
+              - column: description
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: brand_type
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: website
+                validFormat:
+                  regex: ^(ftp|http|https):\/\/[^ "]+$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: founded_year
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: is_active
+                validFormat:
+                  regex: (?:'ACTIVE'|'INACTIVE')
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
