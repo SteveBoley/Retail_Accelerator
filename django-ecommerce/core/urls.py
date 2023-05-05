@@ -10,7 +10,9 @@ from .views import (
     PaymentView,
     AddCouponView,
     RequestRefundView,
-    ItemDetailView
+    ItemDetailView,
+    add_to_favourites,
+    HomeCatView
 )
 
 from dbmigrate.views import create_prods
@@ -19,7 +21,7 @@ app_name = 'core'
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
-    path('category/<slug>/', ItemDetailView.as_view(), name='home_filter'),
+    path('categories/<cats>/', HomeCatView.as_view(), name='home_filter'),
     path('checkout/', CheckoutView.as_view(), name='checkout'),
     path('order-summary/', OrderSummaryView.as_view(), name='order-summary'),
     path('product/<slug>/', ItemDetailView.as_view(), name='product'),
@@ -30,5 +32,6 @@ urlpatterns = [
          name='remove-single-item-from-cart'),
     path('payment/<payment_option>/', PaymentView.as_view(), name='payment'),
     path('request-refund/', RequestRefundView.as_view(), name='request-refund'),
-    path('update-db/', create_prods, name='create-prods')
+    path('update-db/', create_prods, name='create-prods'),
+    path('add-to-favourite/<slug>', add_to_favourites, name='add-to-favourite')
 ]

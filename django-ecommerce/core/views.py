@@ -353,9 +353,13 @@ class HomeView(ListView):
 
 
 class HomeCatView(ListView):
-    model = Item.objects.filter()
+    model = Item
     paginate_by = 20
     template_name = "home.html"
+
+    def get_queryset(self):
+        # self.categories = get_object_or_404(Item, category=)
+        return Item.objects.filter(category=self.kwargs['cats'])
 
 
 class OrderSummaryView(LoginRequiredMixin, View):
@@ -434,6 +438,26 @@ def remove_from_cart(request, slug):
             return redirect("core:product", slug=slug)
     else:
         messages.info(request, "You do not have an active order")
+        return redirect("core:product", slug=slug)
+
+
+@login_required
+def add_to_favourites(request, slug):
+    item = get_object_or_404(Item, slug=slug)
+    user_prof = UserProfile.objects.get(user=request.user)
+    if user_prof.favourites:
+        existing_favourites = user_prof.favourites.split(',')
+    else:
+        existing_favourites = []
+    if item:
+        existing_favourites.append(slug)
+        user_prof.favourites = ','.join(list(set(existing_favourites)))
+        user_prof.save()
+        messages.info(request, "This item was added to your favourites.")
+        return redirect("core:product", slug=slug)
+    else:
+        messages.error(
+            request, "Error!! This Item doesn't exist. Please check the backend")
         return redirect("core:product", slug=slug)
 
 

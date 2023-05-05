@@ -30,6 +30,7 @@ class UserProfile(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
     one_click_purchasing = models.BooleanField(default=False)
+    favourites = models.CharField(max_length=20000, blank=True, null=True)
 
     def __str__(self):
         return self.user.username
@@ -66,6 +67,14 @@ class Item(models.Model):
         return reverse("core:remove-from-cart", kwargs={
             'slug': self.id
         })
+
+    def get_add_to_favourite_url(self):
+        return reverse("core:add-to-favourite", kwargs={
+            'slug': self.id
+        })
+
+    def get_label_display(self):
+        return "badge-dark"
 
 
 class OrderItem(models.Model):
