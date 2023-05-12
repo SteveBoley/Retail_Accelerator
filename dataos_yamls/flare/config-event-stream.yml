@@ -41,8 +41,19 @@ workflow:
                 format: 
             logLevel: INFO
             outputs:
-              - name: output01
-                depot: dataos://icebasedev:event_stream?acl=rw
+              - name: final
+                dataset: dataos://icebasedev:event_stream/ga_test?acl=rw
+                format: Iceberg
+                description: Test sample GA sessions data for retail accelerator
+                tags:
+                  - demo.customers
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+                title: retail customers Source Data
             steps:
               - sink:
                   - sequenceName: eventstream
@@ -58,9 +69,9 @@ workflow:
                       iceberg:
                         partitionSpec:
                           - type: identity
-                            column: event_type
+                            column: event_name
                           - type: month
-                            column: session_start
+                            column: event_date
                             name: month_partitioned
                         properties:
                           write.format.default: parquet
@@ -69,19 +80,19 @@ workflow:
                   - name: eventstream
                     sql: >
                       select * from event_input
-                    # functions:
-                    #   - name: snake_case
-                    #   - name: change_column_case
-                    #     case: lower
-                    #   - name: any_timestamp
-                    #     column: session_start
-                    #     asColumn: session_start
+                    functions:
+                      - name: snake_case
+                      - name: change_column_case
+                        case: lower
+                      - name: any_timestamp
+                        column: event_timestamp
+                        asColumn: event_timestamp
     - name: dataos-tool-eventstream
       spec:
         stack: toolbox
         compute: runnable-default
         toolbox:
-          dataset: dataos://icebasedev:event_stream?acl=rw
+          dataset: dataos://icebasedev:event_stream/ga_test?acl=rw
           action:
             name: set_version
             value: latest
