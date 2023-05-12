@@ -7,9 +7,9 @@ tags:
   - dataos.eventstream
 workflow:
   title: event trigger data
- # schedule:                         
-  #  cron: "*/1 * * * *"
-   # concurrencyPolicy: Forbid 
+  schedule:                         
+    cron: "*/1 * * * *"
+    concurrencyPolicy: Forbid 
   dag:
     - name: event-stream
       title: event stream data
@@ -38,6 +38,18 @@ workflow:
               inputs:
                 - name: event_input
                   dataset: dataos://retailevents:analytics_373787125/events_intraday_20230511
+                  incremental:
+                  context: incremental_data
+                  sql: select *  from incremental_data where  event_timestamp   > to_timestamp('$|start_time|') and order.created_on <= '$|end_time|'
+                  keys:
+                    - name: start_time
+                      sql: SELECT "2023-01-01 00:00:00"
+                                                                                
+                    - name: end_time
+                      sql: select current_timestamp()
+                  state:
+                    - key: start_time
+                      value: end_time
               logLevel: INFO
               outputs:
                 - name: eventstream
