@@ -75,6 +75,9 @@ class Item(models.Model):
 
     def get_label_display(self):
         return "badge-dark"
+    
+    def get_img_url(self):
+        return "https://raw.githubusercontent.com/nibblonian9/test_imgs/main/static_imgs/stat_upload/{0}.jpg".format(self.id)
 
 
 class OrderItem(models.Model):

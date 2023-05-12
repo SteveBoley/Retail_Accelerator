@@ -4,7 +4,7 @@ from trino.dbapi import connect
 from trino.auth import BasicAuthentication
 import pandas as pd
 from core.models import Item
-
+import numpy as np
 # Create your views here.
 
 conn = connect(host="tcp.cheerful-maggot.dataos.app",
@@ -17,7 +17,9 @@ conn = connect(host="tcp.cheerful-maggot.dataos.app",
 
 
 def create_prods(request):
-    qr = 'SELECT * FROM icebasedev.retail_accelerator.product LIMIT 100'
+
+    skus_df = pd.read_csv('./dbmigrate/skus/skus.csv')
+    qr = "SELECT * FROM icebasedev.retail_accelerator.product WHERE sku_id IN ({0})".format(','.join(["'"+s+"'" for s in skus_df['sku_id']]))
 
     cat_qr = 'SELECT * FROM icebasedev.retail_accelerator.product_category'
 
@@ -34,10 +36,13 @@ def create_prods(request):
 
     df_out = df.rename(columns=rename_dict)
     df_out['slug'] = df_out['id'].copy()
+    df_out['discount_price'] = df_out['price'].apply(lambda x: float("{:.2f}".format(x*np.random.uniform(low = 0.6, high = 0.95))))
+
     df_out = df_out[list(rename_dict.values())+['slug']]
 
     df_out = df_out.merge(cat_df[['product_category', 'product_category_id']], left_on='category',
                           right_on='product_category_id', how='left')
+
 
     df_out.rename(columns={'product_category': 'image'}, inplace=True)
     df_out.drop(['product_category_id'], axis=1, inplace=True)

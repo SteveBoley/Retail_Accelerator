@@ -44,13 +44,24 @@ DEBUG_TOOLBAR_CONFIG = {
 #     }
 # }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'postgres',
+#         'USER': 'postgres',
+#         'PASSWORD': 'b754ee054b07bb78b407739',
+#         'HOST': 'postgres.cdn8jsf4zhwg.us-east-1.rds.amazonaws.com',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
+        'NAME': 'retail-test',
         'USER': 'postgres',
-        'PASSWORD': 'b754ee054b07bb78b407739',
-        'HOST': 'postgres.cdn8jsf4zhwg.us-east-1.rds.amazonaws.com',
+        'PASSWORD': 'testpass',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
