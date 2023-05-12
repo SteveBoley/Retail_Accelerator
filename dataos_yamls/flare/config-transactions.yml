@@ -1,0 +1,85 @@
+version: v1
+name: wf-transaction
+type: workflow
+tags:
+  - demo.transaction
+description: The job ingests retail transaction data from Blob Storage to postgres
+workflow:
+  title: Connect retail transaction
+  dag:
+    - name: retail-transaction
+      title: retail-transaction Dataset
+      spec:
+        tags:
+          - demo.transaction
+        stack: flare:3.0
+        compute: runnable-default
+        flare:
+          driver:
+            coreLimit: 1100m
+            cores: 1
+            memory: 1048m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1
+            memory: 1000m 
+          job:
+            explain: true
+
+            inputs:
+              - name: transaction
+                dataset: dataos://thirdparty01:analytics/retail_accelerator/transaction/transaction.csv?acl=rw                
+                format: csv
+            logLevel: INFO
+            outputs:
+              - name: final
+                dataset: dataos://postgres:public/transaction?acl=rw 
+                driver: org.postgresql.Driver
+                format: jdbc
+
+                description: This dataset gives you details of all retail transaction and their corresponding attributes.
+                tags:
+                  - demo.transaction
+                options:
+                  saveMode: overwrite
+
+                title: retail transaction Source Data
+            steps:
+              - sequence:
+                  - name: final
+                    sql: select * from transaction
+                    functions:
+                       - name: any_timestamp
+                         column: transaction_date
+                         asColumn: transaction_date
+
+                       - name: drop_duplicates 
+                         columns: 
+                          - transaction_id
+
+                       - name: set_type
+                         columns:
+                          transaction_id: string
+                          order_id: string
+                          customer_id: string
+                          transaction_type: string
+                          transaction_amount: float
+                          payment_method: string
+                          transaction_status: string
+                  
+                       - name: snake_case
+                       - name: change_column_case
+                         case: lower
+#                   
+#- name: dt-retail-transaction
+#  spec:
+#    stack: toolbox
+#    compute: runnable-default
+#    toolbox:
+#      dataset: dataos://postgres:public/transaction?acl=rw
+#      action:
+#        name: set_version
+#        value: latest
+#  dependencies:
+ #       - retail-transaction

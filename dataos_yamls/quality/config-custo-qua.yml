@@ -33,7 +33,6 @@ workflow:
                   - missing_percentage == 0
                   - missing_count <= 0
 
-
               - column: phone_number
                 validFormat:
                   regex: ^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$
@@ -135,6 +134,68 @@ workflow:
               - column: birth_date
                 validFormat:
                   regex: ^\d{4}\-(0[1-9]|1[012])\-(0[1-9]|[12][0-9]|3[01])$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: zip_code
+                validFormat:
+                  regex: ^[a-zA-Z0-9 ]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: social_class
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: birth_date
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: marital_status
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: degree_of_loyalty
+                validFormat:
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: hobbies
+                validFormat:
+                  regex: ^[a-zA-Z]
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: annual_income
+                validFormat:
+                  regex: ^[a-zA-Z0-9 ]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: occupation
+                validFormat:
+                  regex: ^[a-zA-Z0-9 ]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: register_date
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: mailing_street
+                validFormat:
                 tests:
                   - missing_percentage == 0
                   - missing_count <= 0

@@ -1,17 +1,17 @@
 version: v1
-name: wf-customers
+name: wf-customer
 type: workflow
 tags:
-  - demo.customers
-description: The job ingests retail customers data from Blob Storage to icebase
+  - demo.customer
+description: The job ingests retail customer data from Blob Storage to postgres
 workflow:
-  title: Connect retail customers
+  title: Connect retail customer
   dag:
-    - name: retail-customers
-      title: retail-customers Dataset
+    - name: retail-customer
+      title: retail-customer Dataset
       spec:
         tags:
-          - demo.customers
+          - demo.customer
         stack: flare:3.0
         compute: runnable-default
         flare:
@@ -26,55 +26,77 @@ workflow:
             memory: 1000m 
           job:
             explain: true
+
             inputs:
-              - name: customers
-                dataset: dataos://thirdparty01:customer_retail_demo/customers.csv?acl=rw                       
+              - name: customer
+                dataset: dataos://thirdparty01:analytics/retail_accelerator/customer/customer.csv?acl=rw                
                 format: csv
             logLevel: INFO
             outputs:
               - name: final
-                dataset: dataos://icebasedev:retail_accelerator/customers?acl=rw
-                format: Iceberg
-                description: This dataset gives you details of all retail customers and their corresponding attributes.
+                dataset: dataos://postgres:retail_accelerator/customer?acl=rw 
+                driver: org.postgresql.Driver
+                format: jdbc
+
+                description: This dataset gives you details of all retail customer and their corresponding attributes.
                 tags:
-                  - demo.customers
+                  - demo.customer
                 options:
                   saveMode: overwrite
-                  iceberg:
-                    properties:
-                      write.format.default: parquet
-                      write.metadata.compression-codec: gzip
-                title: retail customers Source Data
+
+                title: retail customer Source Data
             steps:
               - sequence:
                   - name: final
-                    sql: select * from customers limit 5600
+                    sql: select * from customer
                     functions:
                        - name: any_timestamp
                          column: birth_date
                          asColumn: birth_date
+
                        - name: any_timestamp
                          column: register_date
                          asColumn: register_date
+
                        - name: drop_duplicates 
                          columns: 
-                          - email_id
+                          - customer_id
+
                        - name: set_type
                          columns:
+                          first_name: string
+                          last_name: string
+                          gender: string
+                          phone_number: string
+                          email_id: string
                           age: int
+                          education_level: string
+                          marital_status: string
                           number_of_children: int
-                       - name: cleanse_column_names
+                          occupation: string
+                          annual_income: string
+                          hobbies: string
+                          degree_of_loyalty: string
+                          social_class: string
+                          mailing_street: string
+                          city: string
+                          state: string
+                          country: string
+                          zip_code: string
+
+                  
+                       - name: snake_case
                        - name: change_column_case
                          case: lower
-                       
-    - name: dt-retail-customers
-      spec:
-        stack: toolbox
-        compute: runnable-default
-        toolbox:
-          dataset: dataos://icebasedev:retail_accelerator/customers?acl=rw
-          action:
-            name: set_version
-            value: latest
-      dependencies:
-        - retail-customers
+#                   
+#- name: dt-retail-transaction
+#  spec:
+#    stack: toolbox
+#    compute: runnable-default
+#    toolbox:
+#      dataset: dataos://postgres:public/transaction?acl=rw
+#      action:
+#        name: set_version
+#        value: latest
+#  dependencies:
+ #       - retail-transaction
