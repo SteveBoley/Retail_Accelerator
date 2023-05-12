@@ -1,71 +1,61 @@
 version: v1
 name: wf-product-category
 type: workflow
-tags: 
-  - demo.retail 
-description: The job ingests retail product data from Blob Storage to icebase
-workflow: 
-  title: Connect retail product categories 
+tags:
+  - demo.category
+description: The job ingests retail product category data from Blob Storage to postgres
+workflow:
+  title: Connect retail product-category
   dag:
-    - name: retail-product-category 
-      title: retail-product-category Dataset 
-      spec: 
-        tags: 
-          - demo.product
-        stack: flare:3.0 
+    - name: retail-product-category
+      title: retail-product-category Dataset
+      spec:
+        tags:
+          - demo.product-category
+        stack: flare:3.0
         compute: runnable-default
-        flare: 
-          driver: 
-            coreLimit: 1100m 
-            cores: 1 
-            memory: 1048m 
-          executor: 
-            coreLimit: 1200m 
-            cores: 1 
-            instances: 1 
-            memory: 1000m
-          job: 
-            explain: true 
-            inputs: 
-              - name: product
-                dataset: dataos://thirdparty01:analytics/retail_accelerator/product/product_category.csv?acl=rw 
-                format: csv 
-                logLevel: INFO
-            outputs: 
-              - name: final 
-                dataset: dataos://icebasedev:retail_accelerator/product_category?acl=rw 
-                format: Iceberg 
-                description: This dataset gives you details of all retail product categories and its corresponding attributes. 
-                tags: 
-                  - demo.product 
-                options: 
-                  saveMode: overwrite 
-                  iceberg: 
-                    properties: 
-                      write.format.default: parquet 
-                      write.metadata.compression-codec: gzip 
-                title: retail product categories Source Data
-            steps: 
-              - sequence: 
-                - name: final 
-                  sql: select * from product 
-                  # functions: 
-                    # - name: any_timestamp 
-                      # column: launched_ts 
-                      # asColumn: launched_ts 
-                    # - name: set_type 
-                      # columns: 
-                      # list_price: float 
-                      # cost_price: float 
-                      # sale_price: float
-    - name: dt-retail-product-category 
-      spec: 
-        stack: toolbox 
-        compute: runnable-default 
-        toolbox: 
-          dataset: dataos://icebasedev:retail_accelerator/product_category?acl=rw 
-          action: 
-            name: set_version 
-            value: latest 
-      dependencies: 
-        - retail-product-category
+        flare:
+          driver:
+            coreLimit: 1100m
+            cores: 1
+            memory: 1048m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1
+            memory: 1000m 
+          job:
+            explain: true
+
+            inputs:
+              - name: product_category
+                dataset: dataos://thirdparty01:analytics/retail_accelerator/product/product_category.csv?acl=rw         
+                format: csv
+            logLevel: INFO
+            outputs:
+              - name: final
+                dataset: dataos://postgres:retail_accelerator/product_category?acl=rw 
+                driver: org.postgresql.Driver
+                format: jdbc
+
+                description: This dataset gives you details of all retail product_category and their corresponding attributes.
+                tags:
+                  - demo.product_category
+                options:
+                  saveMode: overwrite
+
+                title: retail product_category Source Data
+            steps:
+              - sequence:
+                  - name: final
+                    sql: select * from product_category
+                    functions:
+
+                       - name: set_type
+                         columns:
+                          product_category: string
+                          product_category_id: string
+                  
+                       - name: snake_case
+                       - name: change_column_case
+                         case: lower

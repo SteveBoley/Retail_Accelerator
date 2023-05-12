@@ -1,0 +1,59 @@
+version: v1
+name: wf-brand
+type: workflow
+tags:
+  - demo.brand
+description: The job ingests retail brand data from Blob Storage to postgres
+workflow:
+  title: Connect retail brand
+  dag:
+    - name: retail-brand
+      title: retail-brand Dataset
+      spec:
+        tags:
+          - demo.brand
+        stack: flare:3.0
+        compute: runnable-default
+        flare:
+          driver:
+            coreLimit: 1100m
+            cores: 1
+            memory: 1048m
+          executor:
+            coreLimit: 1200m
+            cores: 1
+            instances: 1
+            memory: 1000m 
+          job:
+            explain: true
+
+            inputs:
+              - name: brand
+                dataset: dataos://thirdparty01:analytics/retail_accelerator/brand/brand.csv?acl=rw              
+                format: csv
+            logLevel: INFO
+            outputs:
+              - name: final
+                dataset: dataos://postgres:retail_accelerator/brand?acl=rw 
+                driver: org.postgresql.Driver
+                format: jdbc
+
+                description: This dataset gives you details of all retail brand and their corresponding attributes.
+                tags:
+                  - demo.brand
+                options:
+                  saveMode: overwrite
+
+                title: retail brand Source Data
+            steps:
+              - sequence:
+                  - name: final
+                    sql: select * from brand
+                    functions: 
+                       - name: drop_duplicates 
+                         columns: 
+                          - brand_id
+                  
+                       - name: snake_case
+                       - name: change_column_case
+                         case: lower

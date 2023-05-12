@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "retail-accelerat-1683279431265",
+  "private_key_id": "6695f979db01c349867cf26b975ce5444ad0f302",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDD0GPQamL0b84V\n18O3OHVD1gQlSy3oQ23x9D5M0CLZrimUf+3mn5TmuX1FRd3pZMWvkfi7HnY3riuK\nJrOSZS4jM6XVNHn8g0dBf52gM/Ln0PIpRF4EXjmloDlcZGhKXAwjAWauW+y1hefU\nMBNU0JLT5vCbNWuP+yhf+AJfid3ZNBP+myPNUBpzAXBqBI34uhbJORElsOIzU2Xo\nx10IzzvHXKqcGuwJA6/GQ7+jYHY0YQnjps6YmzQ4/2Hj+IfvborfEabkEqqfnzKp\naHtbikP/vK+DDfgXQIWzd1uq7NT6K7ebPehqYlKSnU+H1pVY2xc4xNPYLmCPWqt+\n9oiCL/P3AgMBAAECggEABy8rolds5wP9Hy8J5ryDDOiawVWHSyjCLWjlKkNOrAbo\nTqL88wOy3l462uJL2IbSe/USl6bv9m4E+e4ek4Xz0eXQtUhWG24jnKMWgOy3AktX\nvyzbeDSOz+VXhWzHqMbEyToBbu8/eY9+qHnVE70NTgoAlOk6V4+C9TZvu9qekZv3\nlRG916LXjgTCHVNmQcuw0iUKS9Fq7BqSo/RMsgwnhCsORZDkXYAJny3vUfSKSnoS\nQIIgRNOgVUmEPDgxo+Ccgom62pPVYzFey0rXbkxAkAeZDkAJy+JcSPDOP0maVOwW\nEeE60G5X+CHFNvDsLI7uxpEk+K2FD54sOWrcFK/wAQKBgQDtE8J3c2bvZ/UtUuf3\n65UUMmDMHHCi2Q8T47JCsRonl8425VxkA/7csfd4r7w/IXQo8guaZXcsCoekbcaJ\nC3TcbyiHINU6Uk+aTZ51AceW0kgffbrVq4eDBxkZay8erqRyeQJWcQR5rcS3HgMM\nJ2jcjzqmNjw3YNYLOKjZ0oPD9wKBgQDTcX4h52LJUj2zq5QWKeVv14nPTHZOoNrk\nWx07T3jdbWf4dxzeUpcmhr52jd+0OV/kV51bYnn8sTmq26p6YnwP8e9B5+Xfjqd8\nLkKTMRIQAI/4AIYS8CanSuNSlO4/lOSW2c2fUY7HitsdGh8CP4quVreHdNurv7bX\nkxxIJ0lQAQKBgQDcJ5xQBseRDI3ef/3P+WIgNkQzZzml0EGzK6AvVH1ARTWHPujU\nK+2xjkaMOU1rpqpTF6p0v0KykDi0Fgjm3M+xoDwXeALqvOMVHH1IlNV+llnJfJ1S\nrI4TvDSvqRxBttYZQ4xLL3qDcD2b+u/DiplTMGK7VOQIXRGHrB8I3/fiswKBgG5b\nNMbDOnbyuot0yLSMp1gpOZ79PF4rbDN1LpuPDfkbqgEvQdzzZDpSZ0P/JjutGlRW\nOiXBDwQJB50aSy7XCgNUdViDjSGSFe4lQtAJ83BwqrN4qoFl3/a+ikjGvFZpAqmN\nAdneOlQBL/1PbdHBkkMNtXo4TpKkW+zFtiQehRABAoGBAKSTOWq18w4tOvgHAv7B\nqbDQrQ1iK6nZ7+SeKOnjgWwU1C90PCdLADgmDAtMRZM0pcS+7z1Qk4QdcJmm5zVg\n2fY3lOf1IIvV7iu/XstF+lFQROKeoWds5ERoBq2iFgG/a/cw7xuVyX9/8WbdSfq7\nYOGeECeiUDexo0N8xNXKXRKy\n-----END PRIVATE KEY-----\n",
+  "client_email": "starting-account-60dcn97ksta5@retail-accelerat-1683279431265.iam.gserviceaccount.com",
+  "client_id": "116021680962091651607",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/starting-account-60dcn97ksta5%40retail-accelerat-1683279431265.iam.gserviceaccount.com"
+}
