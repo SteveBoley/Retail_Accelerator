@@ -19,80 +19,65 @@ workflow:
           - dataos.eventstream
         stack: flare:3.0
         compute: runnable-default
-      flare:
-          driver:
-              coreLimit: 1200m
-              cores: 1
-              memory: 1024m
-          executor:
-              coreLimit: 1200m    
-              cores: 1
-              instances: 1
-              memory: 1024m
-          job:
-            explain: true
-            streaming:
-              batchMode: true
-              triggerMode: Once
-              checkpointLocation: dataos://icebase:sys01/checkpoint/event/test/event-stream-001?acl=rw
-            inputs:
-              - name: event_input
-                dataset: dataos://eventcapture:analytics_373787125/events_intraday_*
-                format: 
-            logLevel: INFO
-            outputs:
-              - name: final
-                dataset: dataos://icebasedev:event_stream/ga_test?acl=rw
-                format: Iceberg
-                description: Test sample GA sessions data for retail accelerator
-                tags:
-                  - demo.customers
-                options:
-                  saveMode: overwrite
-                  iceberg:
-                    properties:
-                      write.format.default: parquet
-                      write.metadata.compression-codec: gzip
-                title: retail customers Source Data
-            steps:
-              - sink:
-                  - sequenceName: eventstream
-                    datasetName: clickstreamdata
-                    outputName: output01
-                    outputType: Iceberg
-                    description: This dataset gives details of all events trigerred and their corresponding attributes.
-                    title: event trigerred Data
-                    tags:
-                      - dataos.eventstream
-                    outputOptions:
-                      saveMode: append
-                      iceberg:
-                        partitionSpec:
-                          - type: identity
-                            column: event_name
-                          - type: month
-                            column: event_date
-                            name: month_partitioned
-                        properties:
-                          write.format.default: parquet
-                          write.metadata.compression-codec: gzip
-                sequence:
-                  - name: eventstream
-                    sql: >
-                      select * from event_input
-                    functions:
-                      - name: snake_case
-                      - name: change_column_case
-                        case: lower
-                      - name: any_timestamp
-                        column: event_timestamp
-                        asColumn: event_timestamp
+        flare:
+            driver:
+                coreLimit: 1200m
+                cores: 1
+                memory: 1024m
+            executor:
+                coreLimit: 1200m    
+                cores: 1
+                instances: 1
+                memory: 1024m
+            job:
+              explain: true
+              streaming:
+                batchMode: true
+                triggerMode: Once
+                checkpointLocation: dataos://icebase:sys01/checkpoint/event/test/event-stream-001?acl=rw
+              inputs:
+                - name: event_input
+                  dataset: dataos://retailevents:analytics_373787125/events_intraday_20230511
+                  format: 
+              logLevel: INFO
+              outputs:
+                - name: final
+                  dataset: dataos://icebase:event_stream/ga_test?acl=rw
+                  format: Iceberg
+                  description: Test sample GA sessions data for retail accelerator
+                  tags:
+                    - demo.customers
+                  options:
+                        saveMode: append
+                        iceberg:
+                          partitionSpec:
+                            - type: identity
+                              column: event_name
+                            - type: month
+                              column: event_date
+                              name: month_partitioned
+                          properties:
+                            write.format.default: parquet
+                            write.metadata.compression-codec: gzip
+                  title: retail customers Source Data
+              steps:
+                  - sequence:
+                    - name: eventstream
+                      sql: >
+                        select * from event_input
+                      functions:
+                        - name: snake_case
+                        - name: change_column_case
+                          case: lower
+                        - name: any_timestamp
+                          column: event_timestamp
+                          asColumn: event_timestamp
     - name: dataos-tool-eventstream
       spec:
         stack: toolbox
         compute: runnable-default
         toolbox:
-          dataset: dataos://icebasedev:event_stream/ga_test?acl=rw
+          dataset: dataos://icebase:event_stream/ga_test?acl=rw
           action:
             name: set_version
             value: latest

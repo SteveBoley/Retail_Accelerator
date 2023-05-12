@@ -1,0 +1,22 @@
+version: v1
+name: retailevents
+type: depot
+tags:
+  - retail
+  - accelerator
+owner: balaji
+layer: user
+depot:
+  type: BIGQUERY                                  # Depot type
+  description: depot to connect to bigquery ga stream
+  external: true
+  connectionSecret:                               # Data source specific configurations
+    - acl: rw
+      type: key-value-properties
+      data:
+        projectid: ga-streaming-386407
+        email: ga-streamer@ga-streaming-386407.iam.gserviceaccount.com
+      files:
+        json_keyfile: depot/.secrets/ga-streaming-386407-81cbe71c6301.json
+  spec:                                              # Data source specific configurations
+      project: ga-streaming-386407
