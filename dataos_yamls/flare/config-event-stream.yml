@@ -1,0 +1,89 @@
+version: v1
+name: wf-event-trigger
+type: workflow
+workspace: public
+description:  The Job Ingests event stream data from bigquery
+tags:
+  - dataos.eventstream
+workflow:
+  title: event trigger data
+ # schedule:                         
+  #  cron: "*/1 * * * *"
+   # concurrencyPolicy: Forbid 
+  dag:
+    - name: event-stream
+      title: event stream data
+      description: This job ingest data of event stream from BQ to icebasedev
+      spec:
+        tags:
+          - dataos.eventstream
+        stack: flare:3.0
+        compute: runnable-default
+      flare:
+          driver:
+              coreLimit: 1200m
+              cores: 1
+              memory: 1024m
+          executor:
+              coreLimit: 1200m    
+              cores: 1
+              instances: 1
+              memory: 1024m
+          job:
+            explain: true
+            streaming:
+              batchMode: true
+              triggerMode: Once
+              checkpointLocation: dataos://icebase:sys01/checkpoint/event/test/event-stream-001?acl=rw
+            inputs:
+              - name: event_input
+                dataset: dataos://eventcapture:analytics_373787125/events_intraday_*
+                format: 
+            logLevel: INFO
+            outputs:
+              - name: output01
+                depot: dataos://icebasedev:event_stream?acl=rw
+            steps:
+              - sink:
+                  - sequenceName: eventstream
+                    datasetName: clickstreamdata
+                    outputName: output01
+                    outputType: Iceberg
+                    description: This dataset gives details of all events trigerred and their corresponding attributes.
+                    title: event trigerred Data
+                    tags:
+                      - dataos.eventstream
+                    outputOptions:
+                      saveMode: append
+                      iceberg:
+                        partitionSpec:
+                          - type: identity
+                            column: event_type
+                          - type: month
+                            column: session_start
+                            name: month_partitioned
+                        properties:
+                          write.format.default: parquet
+                          write.metadata.compression-codec: gzip
+                sequence:
+                  - name: eventstream
+                    sql: >
+                      select * from event_input
+                    # functions:
+                    #   - name: snake_case
+                    #   - name: change_column_case
+                    #     case: lower
+                    #   - name: any_timestamp
+                    #     column: session_start
+                    #     asColumn: session_start
+    - name: dataos-tool-eventstream
+      spec:
+        stack: toolbox
+        compute: runnable-default
+        toolbox:
+          dataset: dataos://icebasedev:event_stream?acl=rw
+          action:
+            name: set_version
+            value: latest
+      dependencies:
+        - event-stream
