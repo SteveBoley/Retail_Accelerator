@@ -38,11 +38,10 @@ workflow:
               inputs:
                 - name: event_input
                   dataset: dataos://retailevents:analytics_373787125/events_intraday_20230511
-                  format: 
               logLevel: INFO
               outputs:
-                - name: final
-                  dataset: dataos://icebase:event_stream/ga_test?acl=rw
+                - name: eventstream
+                  dataset: dataos://icebasedev:retail_accelerator/ga_test?acl=rw
                   format: Iceberg
                   description: Test sample GA sessions data for retail accelerator
                   tags:
@@ -50,12 +49,12 @@ workflow:
                   options:
                         saveMode: append
                         iceberg:
-                          partitionSpec:
-                            - type: identity
-                              column: event_name
-                            - type: month
-                              column: event_date
-                              name: month_partitioned
+                          # partitionSpec:
+                          #   - type: identity
+                          #     column: event_name
+                          #   - type: month
+                          #     column: event_date
+                          #     name: month_partitioned
                           properties:
                             write.format.default: parquet
                             write.metadata.compression-codec: gzip
@@ -72,12 +71,15 @@ workflow:
                         - name: any_timestamp
                           column: event_timestamp
                           asColumn: event_timestamp
+                        # - name: any_timestamp
+                        #   column: event_date
+                        #   asColumn: event_date
     - name: dataos-tool-eventstream
       spec:
         stack: toolbox
         compute: runnable-default
         toolbox:
-          dataset: dataos://icebase:event_stream/ga_test?acl=rw
+          dataset: dataos://icebasedev:retail_accelerator/ga_test?acl=rw
           action:
             name: set_version
             value: latest

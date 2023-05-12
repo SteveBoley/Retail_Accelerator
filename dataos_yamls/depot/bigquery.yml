@@ -15,8 +15,8 @@ depot:
       type: key-value-properties
       data:
         projectid: ga-streaming-386407
-        email: ga-streamer@ga-streaming-386407.iam.gserviceaccount.com
+        email: omicronian@ga-streaming-386407.iam.gserviceaccount.com
       files:
-        json_keyfile: depot/.secrets/ga-streaming-386407-81cbe71c6301.json
+        json_keyfile: depot/.secrets/ga-streaming-386407-201603edbd61.json
   spec:                                              # Data source specific configurations
       project: ga-streaming-386407
