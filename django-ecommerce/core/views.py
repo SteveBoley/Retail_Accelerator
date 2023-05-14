@@ -350,6 +350,9 @@ class HomeView(ListView):
     model = Item
     paginate_by = 20
     template_name = "home.html"
+    
+    def get_subcat_bool(self):
+        return False
 
 
 class HomeCatView(ListView):
@@ -360,7 +363,15 @@ class HomeCatView(ListView):
     def get_queryset(self):
         # self.categories = get_object_or_404(Item, category=)
         return Item.objects.filter(category=self.kwargs['cats'])
-
+    
+    def get_subcat_bool(self):
+        return True
+    
+    def get_subcats(self):
+        items = Item.objects.filter(category=self.kwargs['cats'])
+        subcats = list(items.values_list('subcat', 'subcat_id').distinct())
+        subcat_dict = [{'id':v[1], 'name':v[0]} for v in subcats]
+        return subcat_dict
 
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):

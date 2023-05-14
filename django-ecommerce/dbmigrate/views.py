@@ -19,7 +19,7 @@ conn = connect(host="tcp.cheerful-maggot.dataos.app",
 def create_prods(request):
 
     skus_df = pd.read_csv('./dbmigrate/skus/skus.csv')
-    qr = "SELECT * FROM icebasedev.retail_accelerator.product WHERE sku_id IN ({0})".format(','.join(["'"+s+"'" for s in skus_df['sku_id']]))
+    qr = "SELECT * FROM postgres.retail_accelerator.product WHERE sku_id IN ({0})".format(','.join(["'"+s+"'" for s in skus_df['sku_id']]))
 
     cat_qr = 'SELECT * FROM icebasedev.retail_accelerator.product_category'
 
@@ -32,11 +32,14 @@ def create_prods(request):
                    'list_price': 'price',
                    'sale_price': 'discount_price',
                    'product_category_id': 'category',
-                   'product_description': 'description'}
+                   'product_subcategory_id': 'subcat_id',
+                   'product_subcategory': 'subcat',
+                   'product_description': 'description'
+                   }
 
     df_out = df.rename(columns=rename_dict)
     df_out['slug'] = df_out['id'].copy()
-    df_out['discount_price'] = df_out['price'].apply(lambda x: float("{:.2f}".format(x*np.random.uniform(low = 0.6, high = 0.95))))
+    #df_out['discount_price'] = df_out['price'].apply(lambda x: float("{:.2f}".format(x*np.random.uniform(low = 0.6, high = 0.95))))
 
     df_out = df_out[list(rename_dict.values())+['slug']]
 
@@ -56,6 +59,6 @@ def create_prods(request):
     out_records = df_out.to_dict(orient='records')
     for r in out_records:
         Item.objects.create(id=r['id'], title=r['title'], price=r['price'],
-                            discount_price=r['discount_price'], category=r['category'], slug=r['slug'], description=r['description'], image=r['image'], label=r['label'])
+                            discount_price=r['discount_price'], category=r['category'], slug=r['slug'], subcat_id = r['subcat_id'], subcat = r['subcat'], description=r['description'], image=r['image'], label=r['label'])
 
     return render(request, 'db_check.html')

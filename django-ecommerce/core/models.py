@@ -45,6 +45,8 @@ class Item(models.Model):
     label = models.CharField(choices=LABEL_CHOICES, max_length=100)
     slug = models.CharField(max_length=100)
     description = models.TextField()
+    subcat_id = models.CharField(max_length=1000)
+    subcat = models.CharField(max_length=2000)
     image = models.ImageField()
 
     def __str__(self):
@@ -72,12 +74,15 @@ class Item(models.Model):
         return reverse("core:add-to-favourite", kwargs={
             'slug': self.id
         })
+    def get_subcat_display(self):
+        return self.subcat
 
     def get_label_display(self):
         return "badge-dark"
     
     def get_img_url(self):
         return "https://raw.githubusercontent.com/nibblonian9/test_imgs/main/static_imgs/stat_upload/{0}.jpg".format(self.id)
+    
 
 
 class OrderItem(models.Model):
