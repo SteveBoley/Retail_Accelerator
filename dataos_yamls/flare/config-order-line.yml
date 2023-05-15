@@ -1,17 +1,17 @@
 version: v1
-name: wf-transaction
+name: wf-orderline
 type: workflow
 tags:
-  - demo.transaction
-description: The job ingests retail transaction data from Blob Storage to postgres
+  - demo.orderline
+description: The job ingests retail order_line_item data from Blob Storage to postgres
 workflow:
-  title: Connect retail transaction
+  title: Connect retail order_line_item
   dag:
-    - name: retail-transaction
-      title: retail-transaction Dataset
+    - name: retail-orderline
+      title: retail-orderline Dataset
       spec:
         tags:
-          - demo.transaction
+          - demo.orderline
         stack: flare:3.0
         compute: runnable-default
         flare:
@@ -28,40 +28,41 @@ workflow:
             explain: true
 
             inputs:
-              - name: transaction
-                dataset: dataos://thirdparty01:analytics/retail_accelerator/transaction/transaction.csv?acl=rw                
+              - name: orderline
+                dataset: dataos://thirdparty01:analytics/retail_accelerator/order/order_line_item.csv?acl=rw                
                 format: csv
             logLevel: INFO
             outputs:
               - name: final
-                dataset: dataos://postgres:retail_accelerator/transaction?acl=rw 
+                dataset: dataos://postgres:retail_accelerator/order_line_item?acl=rw 
                 driver: org.postgresql.Driver
                 format: jdbc
 
-                description: This dataset gives you details of all retail transaction and their corresponding attributes.
+                description: This dataset gives you details of all retail order_line_item and their corresponding attributes.
                 tags:
-                  - demo.transaction
+                  - demo.orderline
                 options:
                   saveMode: overwrite
 
-                title: retail transaction Source Data
+                title: retail order_line_item Source Data
             steps:
               - sequence:
                   - name: final
-                    sql: select * from transaction
+                    sql: select * from orderline
                     functions:
-                       - name: any_timestamp
-                         column: transaction_date
-                         asColumn: transaction_date
-
                        - name: drop_duplicates 
                          columns: 
-                          - transaction_id
-
+                          - order_id
+  
                        - name: set_type
                          columns: 
-                          transaction_amount: float
-                  
+                          product_price: float
+                          order_total: float
+                          discounted_amount: float
+                          tax_percentage: float
+                          shipping_amount: int
+                          total_price: float
+                      
                        - name: snake_case
                        - name: change_column_case
                          case: lower
