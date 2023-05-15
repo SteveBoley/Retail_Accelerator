@@ -30,6 +30,10 @@ def products(request):
     return render(request, "products.html", context)
 
 
+def get_cust_id(username):
+    up = UserProfile.objects.filter(user__username = username)
+    return up.values('customer_id')[0]['customer_id']
+
 def is_valid_form(values):
     valid = True
     for field in values:
@@ -47,7 +51,8 @@ class CheckoutView(View):
                 'form': form,
                 'couponform': CouponForm(),
                 'order': order,
-                'DISPLAY_COUPON_FORM': True
+                'DISPLAY_COUPON_FORM': True,
+                'userid':  get_cust_id(self.request.user.username)
             }
 
             shipping_address_qs = Address.objects.filter(
@@ -214,7 +219,8 @@ class PaymentView(View):
             context = {
                 'order': order,
                 'DISPLAY_COUPON_FORM': False,
-                'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY
+                'STRIPE_PUBLIC_KEY': settings.STRIPE_PUBLIC_KEY,
+                'userid':  get_cust_id(self.request.user.username)
             }
             userprofile = self.request.user.userprofile
             if userprofile.one_click_purchasing:
@@ -353,6 +359,10 @@ class HomeView(ListView):
     
     def get_subcat_bool(self):
         return False
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['userid'] = get_cust_id(self.request.user.username)
+        return context
 
 
 class HomeCatView(ListView):
@@ -372,13 +382,19 @@ class HomeCatView(ListView):
         subcats = list(items.values_list('subcat', 'subcat_id').distinct())
         subcat_dict = [{'id':v[1], 'name':v[0]} for v in subcats]
         return subcat_dict
+    
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['userid'] = get_cust_id(self.request.user.username)
+        return context
 
 class OrderSummaryView(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
             order = Order.objects.get(user=self.request.user, ordered=False)
             context = {
-                'object': order
+                'object': order,
+                'userid':  get_cust_id(self.request.user.username)
             }
             return render(self.request, 'order_summary.html', context)
         except ObjectDoesNotExist:
@@ -391,7 +407,9 @@ class ItemDetailView(DetailView):
     template_name = "product.html"
 
     def get_context_data(self, **kwargs: Any):
-        return super().get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
+        context['userid'] = get_cust_id(self.request.user.username)
+        return context
 
 
 def add_url_params(camp_id):
@@ -549,7 +567,8 @@ class RequestRefundView(View):
     def get(self, *args, **kwargs):
         form = RefundForm()
         context = {
-            'form': form
+            'form': form,
+            'userid':  get_cust_id(self.request.user.username)
         }
         return render(self.request, "request_refund.html", context)
 

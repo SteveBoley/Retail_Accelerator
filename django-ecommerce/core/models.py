@@ -4,6 +4,7 @@ from django.db import models
 from django.db.models import Sum
 from django.shortcuts import reverse
 from django_countries.fields import CountryField
+import numpy as np
 
 
 CATEGORY_CHOICES = (
@@ -31,7 +32,7 @@ class UserProfile(models.Model):
     stripe_customer_id = models.CharField(max_length=50, blank=True, null=True)
     one_click_purchasing = models.BooleanField(default=False)
     favourites = models.CharField(max_length=20000, blank=True, null=True)
-
+    customer_id = models.CharField(max_length=100, blank=False,null=False)
     def __str__(self):
         return self.user.username
 
@@ -202,7 +203,8 @@ class Refund(models.Model):
 
 def userprofile_receiver(sender, instance, created, *args, **kwargs):
     if created:
-        userprofile = UserProfile.objects.create(user=instance)
+        cust_id = str(np.random.randint(low = 15000, high = 25000))
+        userprofile = UserProfile.objects.create(user=instance, customer_id = cust_id)
 
 
 post_save.connect(userprofile_receiver, sender=settings.AUTH_USER_MODEL)
