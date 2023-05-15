@@ -37,7 +37,7 @@ workflow:
                 checkpointLocation: dataos://icebase:sys01/checkpoint/event/test/event-stream-001?acl=rw
               inputs:
                 - name: event_input
-                  dataset: dataos://retailevents:analytics_373787125/events_intraday_20230511
+                  dataset: dataos://retailevents:analytics_373787125/events_intraday_20230512
                   incremental:
                   context: incremental_data
                   sql: select *  from incremental_data where  event_timestamp   > to_timestamp('$|start_time|') and  <= '$|end_time|'
@@ -59,13 +59,13 @@ workflow:
                   tags:
                     - demo.customers
                   options:
-                        saveMode: append
+                        saveMode: overwrite
                         iceberg:
                           # partitionSpec:
                           #   - type: identity
                           #     column: event_name
                           #   - type: month
-                          #     column: event_date
+                          #     column: event_timestamp
                           #     name: month_partitioned
                           properties:
                             write.format.default: parquet
