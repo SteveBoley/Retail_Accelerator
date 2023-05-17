@@ -32,7 +32,10 @@ def products(request):
 
 def get_cust_id(username):
     up = UserProfile.objects.filter(user__username = username)
-    return up.values('customer_id')[0]['customer_id']
+    if len(up.values('customer_id')) == 0:
+        return None
+    else:
+        return up.values('customer_id')[0]['customer_id']
 
 def is_valid_form(values):
     valid = True

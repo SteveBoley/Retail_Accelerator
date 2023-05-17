@@ -1,0 +1,23 @@
+version: v1
+name: retail-accelerator-streamlit
+type: service
+service:
+  title: Streamlit SPA for retail accelerator
+  replicas: 1
+  servicePort: 8501
+  ingress:
+    enabled: true
+    noAuthentication: true
+    path: /retail_streamlit
+    stripPath: true
+  stack: alpha
+  compute: runnable-default
+  envs:
+    LOG_LEVEL: info
+  alpha:
+    command: 
+      - streamlit
+    arguments:
+      - run
+      - customer_profile.py
+    image: sndatanator/retail_streamlit:v1.0

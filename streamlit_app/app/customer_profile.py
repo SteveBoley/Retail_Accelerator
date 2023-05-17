@@ -55,6 +55,27 @@ top_10_prodcat_df = top_10_prodcat_df[top_10_prodcat_df['full_name'] == selected
 order_df = order_df[order_df['full_name']== selected_customer]
 segment_df = segment_df[segment_df['full_name'] == selected_customer]
 
+def create_donut_chart(segment_df, selected_customer):
+    selected_segments = segment_df[segment_df['full_name'] == selected_customer]['segment_name']
+    segment_counts = selected_segments.value_counts()
+    fig, ax = plt.subplots()
+    ax.pie(segment_counts, labels=segment_counts.index, startangle=90, wedgeprops=dict(width=0.3))
+    circle = plt.Circle((0, 0), 0.1, color='white')
+    ax.add_artist(circle)
+    ax.set_aspect('equal')
+    ax.set_title(f'Segment Distribution - {selected_customer}')
+    st.pyplot(fig)
+
+def create_graphviz(segment_df, selected_customer):
+    selected_segments = segment_df[segment_df['full_name'] == selected_customer]['segment_name']
+    segment_counts = selected_segments.value_counts()
+    fig, ax = plt.subplots()
+    ax.pie(segment_counts, labels=segment_counts.index, startangle=90, wedgeprops=dict(width=0.3))
+    circle = plt.Circle((0, 0), 0.1, color='white')
+    ax.add_artist(circle)
+    ax.set_aspect('equal')
+    ax.set_title(f'Segment Distribution - {selected_customer}')
+    st.pyplot(fig)
 
 tab1, tab2, tab3 ,tab4 = st.tabs(["Customer Profile", "Activity", "Orders", "Segment"])
 
@@ -103,17 +124,4 @@ with tab3:
 
 with tab4:
     st.header("Segment")
-    
-
-    def create_donut_chart(segment_df, selected_customer):
-        selected_segments = segment_df[segment_df['full_name'] == selected_customer]['segment_name']
-        segment_counts = selected_segments.value_counts()
-        fig, ax = plt.subplots()
-        ax.pie(segment_counts, labels=segment_counts.index, startangle=90, wedgeprops=dict(width=0.3))
-        circle = plt.Circle((0, 0), 0.1, color='white')
-        ax.add_artist(circle)
-        ax.set_aspect('equal')
-        ax.set_title(f'Segment Distribution - {selected_customer}')
-        st.pyplot(fig)
-
     create_donut_chart(segment_df, selected_customer)
