@@ -19,6 +19,7 @@ extra-streamlit-components==0.1.56
 fonttools==4.39.4
 gitdb==4.0.10
 GitPython==3.1.31
+graphviz==0.20.1
 idna==3.4
 importlib-metadata==6.6.0
 importlib-resources==5.12.0
