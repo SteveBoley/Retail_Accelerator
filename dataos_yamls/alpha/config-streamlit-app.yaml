@@ -20,4 +20,4 @@ service:
     arguments:
       - run
       - customer_profile.py
-    image: sndatanator/retail_streamlit:v1.0
+    image: sndatanator/retail_streamlit:v2.1
