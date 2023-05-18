@@ -1,30 +1,32 @@
 version: v1
-name: wf-quality-customers
+name: wf-quality-customer
 type: workflow
 tags:
   - demo.customer
-description: The job performs metrics calculations and checks on customers data
+description: The job performs metrics calculations and checks on customer data
 workflow:
   title: Metrics and checks
   dag:
-    - name: quality-customers
+    - name: quality-customer
       title: Metrics and checks
-      description: The job performs metrics calculations and checks on customers data
+      description: The job performs metrics calculations and checks on customer data
       spec:
         stack: flare:3.0
         compute: runnable-default
         tags:
           - Metrics
         title: Metrics and checks
-        description: The job performs metrics calculations and checks on customers data
+        description: The job performs metrics calculations and checks on customer data
         flare:
           job:
             explain: true
             logLevel: INFO
             inputs:
               - name: source
-                dataset:  dataos://icebasedev:retail_accelerator/customers
-                format: iceberg
+                dataset:  dataos://postgres:retail_accelerator/customer
+                format: jdbc
+                options: 
+                  driver: org.postgresql.Driver
 
             assertions:
               - column: customer_id

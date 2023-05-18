@@ -1,19 +1,19 @@
 version: v1
-name: wf-product-subcat
+name: wf-transaction-profile
 type: workflow
 tags:
-  - demo.prod-subcategory
+  - demo.transaction
 workflow:
-  title: Connect retail product-subcategory
+  title: Connect transaction
   dag:
-  - name: product-subcategory-profile
-    title: product-subcategory profile 
-    description: The job performs profiling on the product subcategory data
+  - name: transaction-profile-profile
+    title: transaction profile Profiler
+    description: The job performs profiling on the transaction data
     spec:
       stack: flare:3.0
       compute: runnable-default
       tier: system
-      title: product-subcategory Profiler
+      title: transaction Profiler
       persistentVolume:
         name: persistent-v
         directory: fides
@@ -30,8 +30,8 @@ workflow:
         job:
           explain: true
           inputs:
-            - name: product_subcategory
-              dataset:  dataos://postgres:retail_accelerator/subcategory
+            - name: transaction
+              dataset:  dataos://postgres:retail_accelerator/transaction
               format: jdbc
               options: 
                 driver: org.postgresql.Driver

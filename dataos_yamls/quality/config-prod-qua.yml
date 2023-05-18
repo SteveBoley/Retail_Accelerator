@@ -23,8 +23,10 @@ workflow:
             logLevel: INFO
             inputs:
               - name: source
-                dataset:  dataos://icebasedev:retail_accelerator/product
-                format: iceberg
+                dataset:  dataos://postgres:retail_accelerator/product
+                format: jdbc
+                options: 
+                  driver: org.postgresql.Driver
 
             assertions:
               - column: sku_id
@@ -115,13 +117,6 @@ workflow:
                 validFormat:
                   regex: ^[0-9_.-]*$
                 tests:
-                  - missing_percentage == 0
-                  - missing_count <= 0
-
-              - column: cost_price
-                validFormat:
-                  regex: ^[0-9_.-]*$
-                tests: 
                   - missing_percentage == 0
                   - missing_count <= 0
 

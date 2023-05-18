@@ -23,9 +23,11 @@ workflow:
             logLevel: INFO
             inputs:
               - name: source
-                dataset:  dataos://icebasedev:retail_accelerator/product_category
-                format: iceberg
-
+                dataset:  dataos://postgres:retail_accelerator/product_category
+                format: jdbc
+                options: 
+                  driver: org.postgresql.Driver
+                  
             assertions:
               - column: product_category
                 validFormat:

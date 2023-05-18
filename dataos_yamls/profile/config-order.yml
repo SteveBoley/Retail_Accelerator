@@ -1,19 +1,19 @@
 version: v1
-name: wf-product-subcat
+name: wf-order-profile
 type: workflow
 tags:
-  - demo.prod-subcategory
+  - demo.order
 workflow:
-  title: Connect retail product-subcategory
+  title: Connect order
   dag:
-  - name: product-subcategory-profile
-    title: product-subcategory profile 
-    description: The job performs profiling on the product subcategory data
+  - name: order-profile-profile
+    title: order profile Profiler
+    description: The job performs profiling on the order data
     spec:
       stack: flare:3.0
       compute: runnable-default
       tier: system
-      title: product-subcategory Profiler
+      title: order Profiler
       persistentVolume:
         name: persistent-v
         directory: fides
@@ -30,8 +30,8 @@ workflow:
         job:
           explain: true
           inputs:
-            - name: product_subcategory
-              dataset:  dataos://postgres:retail_accelerator/subcategory
+            - name: orders
+              dataset:  dataos://postgres:retail_accelerator/orders
               format: jdbc
               options: 
                 driver: org.postgresql.Driver

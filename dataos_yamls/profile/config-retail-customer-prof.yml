@@ -1,19 +1,19 @@
 version: v1
-name: wf-customers-profile
+name: wf-customer-profile
 type: workflow
 tags:
-  - demo.customers
+  - demo.customer
 workflow:
   title: Connect customers
   dag:
-  - name: customers-profile-profile
-    title: customers profile Profiler
-    description: The job performs profiling on the customers data
+  - name: customer-profile-profile
+    title: customer profile Profiler
+    description: The job performs profiling on the customer data
     spec:
       stack: flare:3.0
       compute: runnable-default
       tier: system
-      title: customers Profiler
+      title: customer Profiler
       persistentVolume:
         name: persistent-v
         directory: fides
@@ -30,9 +30,11 @@ workflow:
         job:
           explain: true
           inputs:
-            - name: customers
-              dataset:  dataos://icebasedev:retail_accelerator/customers
-              format: iceberg
+            - name: customer
+              dataset:  dataos://postgres:retail_accelerator/customer
+              format: jdbc
+              options: 
+                driver: org.postgresql.Driver
           logLevel: INFO
           profile:
             level: basic

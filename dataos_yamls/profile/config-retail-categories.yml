@@ -31,8 +31,10 @@ workflow:
           explain: true
           inputs:
             - name: product_category
-              dataset:  dataos://icebasedev:retail_accelerator/product_category
-              format: iceberg
+              dataset:  dataos://postgres:retail_accelerator/product_category
+              format: jdbc
+              options: 
+                driver: org.postgresql.Driver
           logLevel: INFO
           profile:
             level: basic

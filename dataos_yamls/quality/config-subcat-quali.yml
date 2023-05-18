@@ -23,8 +23,10 @@ workflow:
             logLevel: INFO
             inputs:
               - name: source
-                dataset:  dataos://icebasedev:retail_accelerator/product_subcategory
-                format: iceberg
+                dataset:  dataos://postgres:retail_accelerator/subcategory
+                format: jdbc
+                options: 
+                  driver: org.postgresql.Driver
 
             assertions:
               - column: product_subcategory
@@ -49,38 +51,4 @@ workflow:
                 tests:
                   - duplicate_count == 0
                   - missing_percentage == 0
-                  - missing_count <= 
-                  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                - column: register_date
-                validFormat:
-                  regex: [0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1]) (2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9]
-                tests: 
-                  - missing_percentage == 0
                   - missing_count <= 0
-                  - register_date > birth_date 

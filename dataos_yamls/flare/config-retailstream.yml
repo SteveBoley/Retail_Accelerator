@@ -1,0 +1,67 @@
+version: v1
+name: wf-order-summ-data
+type: workflow
+description: This jobs query lens and write data to postgres table
+workflow:
+  title: Order Summary
+  dag:
+    - name: order-summary-data
+      title: Order Summary
+      spec:
+        stack: flare:3.0
+        compute: runnable-default
+        flare:
+          job:
+            explain: true
+            inputs:
+              - name: input_order
+                query: |
+                  SELECT
+                    "product.total_products" as total_products,
+                    "order_shipment.total_order_quantity" as total_order_quantity,
+                    cast("order_shipment.total_shipment_cost" as int) as total_shipment_cost,
+                    "order_shipment.shipment_type" as shipment_type,
+                    "order.order_id" as order_id,
+                    "order.order_date" as order_ts,
+                    "retailer.type" as retailer_type,
+                    "retailer.name" as retailer_name,
+                    "retailer.chain" as retailer_chain,
+                    "retailer.state" as retailer_state,
+                    "retailer.city" as retailer_city
+                  FROM
+                    LENS (
+                      SELECT
+                        "product.total_products",
+                        "order_shipment.total_order_quantity",
+                        "order_shipment.total_shipment_cost",
+                        "order_shipment.shipment_type",
+                        "order.order_id",
+                        "order.order_date",
+                        "retailer.type",
+                        "retailer.name",
+                        "retailer.chain",
+                        "retailer.state",
+                        "retailer.city"
+                      FROM
+                        supplychain
+                    ) WHERE "order.order_id" is not null
+                options:
+                  SSL: "true"
+                  driver: "io.trino.jdbc.TrinoDriver"
+                  cluster: "minervac"
+
+            logLevel: INFO
+            outputs:
+              - name: final
+                dataset: dataos://icebaseev:spend_analysis/category_manager_mapping?acl=rw
+                format: Iceberg
+                description: This dataset gives you details of all Category Manager Mapping Source Data 
+                tags:
+                  - spend
+                options:
+                  saveMode: overwrite
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+                title: Sample Data Source Data 

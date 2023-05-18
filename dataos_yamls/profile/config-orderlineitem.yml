@@ -1,19 +1,19 @@
 version: v1
-name: wf-product-profile
+name: wf-orderline-profile
 type: workflow
 tags:
-  - demo.product
+  - demo.orderline
 workflow:
-  title: Connect product
+  title: Connect orderline
   dag:
-  - name: product-profile-profile
-    title: product profile Profiler
-    description: The job performs profiling on the product data
+  - name: orderline-profile-profile
+    title: orderline profile Profiler
+    description: The job performs profiling on the order line item data
     spec:
       stack: flare:3.0
       compute: runnable-default
       tier: system
-      title: product Profiler
+      title: order Profiler
       persistentVolume:
         name: persistent-v
         directory: fides
@@ -30,9 +30,11 @@ workflow:
         job:
           explain: true
           inputs:
-            - name: product
-              dataset:  dataos://icebasedev:retail_accelerator/product
-              format: iceberg
+            - name: order
+              dataset:  dataos://postgres:retail_accelerator/order_line_item
+              format: jdbc
+              options: 
+                driver: org.postgresql.Driver
           logLevel: INFO
           profile:
             level: basic
