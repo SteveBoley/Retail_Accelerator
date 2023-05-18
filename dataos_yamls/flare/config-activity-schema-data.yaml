@@ -1,0 +1,114 @@
+version: v1
+name: wf-ra-activity-schema
+type: workflow
+tags:
+  - demo.activity_schema
+description: The job ingests retail activity schema data from blob storage to icebase
+workflow:
+  title: Connect Retail Activity Schema
+  dag:
+    - name: retail-activity
+      title: Retail Activity Schema Dataset
+      spec:
+        tags:
+          - demo.activity_schema
+        stack: flare:4.0
+        compute: runnable-default
+        flare:
+          driver:
+              coreLimit: 1200m
+              cores: 1
+              memory: 1024m
+          executor:
+              coreLimit: 1200m    
+              cores: 1
+              instances: 1
+              memory: 1024m
+
+          job:
+            explain: true
+            inputs:
+              - name: clickstream
+                dataset: dataos://icebasedev:retail_accelerator/clickstream?acl=rw                       
+                format: iceberg
+                incremental:
+                  context: incremental_activity_04
+                  sql: >
+                    SELECT * FROM incremental_activity_04
+                    WHERE  visit_start_time  >= '$|start|' AND visit_start_time  <= '$|end|'
+
+                  keys:     
+                    - name: start
+                      sql: select to_timestamp('2022-10-01 00:00:00')
+                                                                                
+                    - name: end
+                      sql: select current_timestamp()
+                  state:
+                    - key: start
+                      value: end
+
+            logLevel: INFO
+            outputs:
+              - name: activity_schema
+                dataset: dataos://icebasedev:retail_accelerator/activity_schema_data?acl=rw
+                format: Iceberg
+                description: This dataset gives you details of all customer activity and corresponding features
+                tags:
+                  - demo.activity_schema
+                options:
+                  saveMode: append
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+            steps:
+              - sequence:
+                  - name: step
+                    sql: SELECT 
+                            *, 
+                            DENSE_RANK() OVER(PARTITION BY clientid, event_name  ORDER BY event_ts) AS occurence,
+                            LEAD(event_ts) OVER(PARTITION BY clientid, event_name  ORDER BY event_ts) AS activity_repeated_at
+                          FROM clickstream
+ 
+
+                  - name: activity_schema
+                    sql:  SELECT 
+                            uuid()           AS activity_uuid,
+                            visitorid        AS visitor_id,
+                            sessionid        AS session_id,
+                            clientid         AS entity_id,
+                            event_ts         AS activity_ts,                            
+                            event_name       AS activity,
+                            transaction_id   AS feature1,
+                            productsku       AS feature2,                            
+                            product_price    AS feature3,
+                            itemquantity     AS feature4,
+                            itemrevenue      AS feature5,
+                            event_action     AS feature6,
+                            traffic_channel  AS feature7,                          
+                            traffic_source   AS feature8,
+                            occurence,
+                            activity_repeated_at
+                          FROM step
+   
+
+
+  
+  
+
+
+
+
+
+
+    # - name: dt-retail-activity-01
+    #   spec:
+    #     stack: toolbox
+    #     compute: runnable-default
+    #     toolbox:
+    #       dataset: dataos://icebasedev:retail_accelerator/activity_schema_data?acl=rw
+    #       action:
+    #         name: set_version
+    #         value: latest
+    #   dependencies:
+    #     - retail-activity-01

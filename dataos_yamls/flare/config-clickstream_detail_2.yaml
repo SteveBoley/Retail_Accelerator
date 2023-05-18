@@ -1,0 +1,84 @@
+version: v1
+name: wf-ra-clickstream
+type: workflow
+tags:
+  - retail_accelerator
+  - clickstream
+description: The workflow to ingest clickstream dataset from thirdparty01 into icebase
+workflow:
+  title: Data of Clickstream
+  dag:
+    - name: clickstream-data
+      title: Clickstream Dataset
+      spec:
+        stack: flare:4.0
+        compute: runnable-default
+        flare:
+          # driver:
+          #   coreLimit: 1500m
+          #   cores: 1
+          #   memory: 2000m
+          # executor:
+          #   coreLimit: 2000m
+          #   cores: 2
+          #   instances: 2
+          #   memory: 3000m 
+          job:
+            explain: true
+            inputs:
+              - name: input_data
+                dataset: dataos://thirdparty01:analytics/retail_accelerator/clickstream/clickstream_detail_2.csv?acl=rw                       
+                format: csv
+
+            logLevel: INFO
+            outputs:
+              - name: final
+                dataset: dataos://icebasedev:retail_accelerator/clickstream?acl=rw
+                format: Iceberg
+                description: This dataset gives you the details of events performed by customers on website.
+                tags:
+                  - retail_accelerator
+                  - clickstream
+                options:
+                  saveMode: append
+                  iceberg:
+                    properties:
+                      write.format.default: parquet
+                      write.metadata.compression-codec: gzip
+                title: Clickstream Source Data 
+
+            steps:  
+              - sequence:
+                  - name: step
+                    sql: SELECT * from input_data
+                    functions:
+                      - name: change_column_case 
+                        case: lower
+
+                      - name: any_timestamp
+                        column: visit_start_time
+                        asColumn: visit_start_time
+              
+                      - name: any_timestamp
+                        column: event_ts
+                        asColumn: event_ts
+
+                      - name: set_type
+                        columns:
+                          product_price: double
+                          product_quantity: int
+                          product_revenue: double
+                          product_refund_amount: double
+                          event_id: int
+                          itemquantity: int
+                          itemrevenue: double
+                          event_value: double
+
+
+                  - name: final
+                    sql: select * from step
+
+
+                      
+
+                         

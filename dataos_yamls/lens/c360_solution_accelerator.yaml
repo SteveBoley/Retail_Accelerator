@@ -1,0 +1,939 @@
+name: c360                                                            #c360_solution_accelerator
+description: Data Model to answer any questions around a customer.
+contract: sample
+owner: gauravkumar
+tags:
+  - c360
+  - activity_schema
+  - segment
+entities:
+  - name: customer
+    sql:
+      query: >
+        SELECT * FROM icebasedev.retail_accelerator.customers
+      columns:
+        - name: customer_id
+        - name: first_name
+        - name: last_name    
+        - name: birth_date                
+        - name: email_id
+        - name: phone_number
+        - name: mailing_street
+        - name: country
+        - name: state
+        - name: city
+        - name: zip_code
+        - name: register_date
+      verified: true
+      tables:
+        - icebasedev.retail_accelerator.customers
+    fields:
+      - name: customer_id
+        type: string
+        description: unique identifier of the customer
+        column: customer_id
+        primary: true
+        tags:
+          - customer_identifier
+
+      - name: first_name
+        type: string
+        description: Business first name the customer operates under
+        column: first_name
+        tags:
+          - name_identifier
+
+      - name: last_name
+        type: string
+        description: Business last name the customer operates under
+        column: last_name
+        tags:
+          - name_identifier
+
+      - name: birth_date
+        type: date
+        description: Birth date of the customer 
+        column: birth_date
+
+      - name: email
+        type: string
+        description: email address of the customer
+        column: email_id
+        tags:
+          - email_identifier
+
+      - name: phone_number
+        type: string
+        description: contact number of the customer
+        column: phone_number
+        tags:
+          - phone_identifier
+
+      - name: address
+        type: string
+        description: postal address of the customer
+        column: mailing_street
+        tags:
+          - address_identifier
+
+      - name: country
+        type: string
+        description: name of the county
+        column: country
+
+      - name: state
+        type: string
+        description: state code where the customer physical address is located
+        column: state
+
+      - name: city
+        type: string
+        description: name of the city
+        column: city
+
+      - name: zip
+        type: string
+        description: ZIP code associate with the customer physical address
+        column: zip_code
+
+      - name: register_date
+        type: date
+        description: registered date of customer
+        column: register_date
+
+
+    measures:
+      - name: total_customers
+        sql_snippet: ${customer.customer_id}
+        type: count
+        description: count of total customers
+        hidden: false
+        tags:
+          - total_customers
+
+    relationships:
+      - type: 1:N
+        field: customer_id
+        target:
+          name: items_added_to_favorite
+          field: entity_id
+        verified: true 
+
+      - type: 1:N
+        field: customer_id
+        target:
+          name: items_added_to_cart
+          field: entity_id
+        verified: true        
+
+      - type: 1:N
+        field: customer_id
+        target:
+          name: order_placed
+          field: entity_id
+        verified: true
+
+      - type: 1:N
+        field: customer_id
+        target:                                     
+          name: segment
+          field: customer_id
+        verified: true 
+
+
+  - name: items_added_to_favorite
+    sql:
+      query: >
+       SELECT 
+          activity_uuid, 
+          session_id,
+          entity_id,
+          activity_ts,   
+          feature2    AS product_sku,
+          feature3    AS product_price,
+          feature4    AS quantity,
+          feature5    AS order_value,
+          feature6    AS event_action,     
+          feature7    AS traffic_channel,                        
+          feature8    AS traffic_source,          
+          product_name,
+          category_name,
+          subcategory_name,
+          brand_name,
+          parent_company,
+          occurence,
+          activity_repeated_at
+        FROM "icebasedev"."retail_accelerator".activity_schema_data AS j 
+        JOIN 
+        (
+          WITH pb AS
+          (
+          SELECT 
+          p.sku_id,
+          p.product_category_id,
+          p.product_subcategory_id,
+          p.product_id,
+          p.product_name,
+          p.list_price,
+          p.sale_price,
+          p.launched_ts,
+          p.brand_id,
+          b.brand_name, 
+          b.parent_company
+          FROM icebasedev.retail_accelerator.product AS p
+          LEFT JOIN icebasedev.retail_accelerator.brand AS b
+          ON p.brand_id = b.brand_id
+          ),
+
+          cat_subcat AS
+          (
+          SELECT 
+          pc.product_category_id     AS category_id, 
+          pc.product_category        AS category_name, 
+          psc.product_subcategory_id AS subcategory_id, 
+          psc.product_subcategory    AS subcategory_name
+          FROM icebasedev.retail_accelerator.product_subcategory AS psc 
+          LEFT JOIN  icebasedev.retail_accelerator.product_category AS pc              
+          ON psc.product_category_id =  pc.product_category_id
+          ),
+
+          all AS
+          (
+          SELECT cat_subcat.*, pb.* FROM pb LEFT JOIN cat_subcat ON pb.product_subcategory_id = cat_subcat.subcategory_id
+          )
+          SELECT * FROM all
+
+        ) as k
+
+        ON j.feature2 = k.sku_id
+        WHERE j.activity = 'product_favourite'
+
+        UNION
+        
+        SELECT 
+          null            AS activity_uuid, 
+          null            AS session_id,
+          user_id         AS entity_id,
+          event_ts        AS activity_ts,         
+          product_sku     AS product_sku,
+          null            AS product_price,
+          null            AS quantity,
+          null            AS order_value,
+          null            AS event_action,     
+          null            AS traffic_channel,                        
+          null            AS traffic_source, 
+          product_name,
+          category_name,
+          subcategory_name,
+          brand_name,
+          parent_company,
+          null            AS occurence,
+          null            AS activity_repeated_at 
+          FROM (
+
+          SELECT * FROM
+          (
+                      SELECT
+              from_unixtime(event_timestamp / 1000000) AS event_ts,
+              event_name,
+              user_id,
+              regexp_replace(
+                REPLACE(
+                  string_value,
+                  'https://retail-demo.dataos.app/product/',
+                  ''
+                ),
+                '/.*',
+                ''
+              ) AS product_sku
+            FROM
+              (
+                SELECT
+                  event_timestamp,
+                  event_name,
+                  user_id,
+                  value001.*
+                FROM
+                  (
+                    SELECT
+                      event_timestamp,
+                      event_name,
+                      user_id,
+                      t.*
+                    FROM
+                      "retailevents"."analytics_373787125"."events_intraday_*"
+                      CROSS JOIN UNNEST(event_params) AS t
+                    WHERE
+                      event_name = 'add_to_fav'
+                  )
+                  CROSS JOIN UNNEST(array [value]) AS value001
+                WHERE
+                  KEY = 'page_location'
+              )) WHERE  event_ts >= current_timestamp - interval '1' hour
+          ) AS j 
+
+        JOIN 
+        (
+          WITH pb AS
+          (
+          SELECT 
+          p.sku_id,
+          p.product_category_id,
+          p.product_subcategory_id,
+          p.product_id,
+          p.product_name,
+          p.list_price,
+          p.sale_price,
+          p.launched_ts,
+          p.brand_id,
+          b.brand_name, 
+          b.parent_company
+          FROM icebasedev.retail_accelerator.product AS p
+          LEFT JOIN icebasedev.retail_accelerator.brand AS b
+          ON p.brand_id = b.brand_id
+          ),
+
+          cat_subcat AS
+          (
+          SELECT 
+          pc.product_category_id     AS category_id, 
+          pc.product_category        AS category_name, 
+          psc.product_subcategory_id AS subcategory_id, 
+          psc.product_subcategory    AS subcategory_name
+          FROM icebasedev.retail_accelerator.product_subcategory AS psc 
+          LEFT JOIN  icebasedev.retail_accelerator.product_category AS pc              
+          ON psc.product_category_id =  pc.product_category_id
+          ),
+
+          all AS
+          (
+          SELECT cat_subcat.*, pb.* FROM pb LEFT JOIN cat_subcat ON pb.product_subcategory_id = cat_subcat.subcategory_id
+          )
+          SELECT * FROM all
+
+        ) as k
+
+        ON j.product_sku = k.sku_id
+      # WHERE j.event_name = 'add_to_fav'
+
+      columns:
+        - name: activity_uuid
+        - name: session_id 
+        - name: entity_id
+        - name: activity_ts
+        - name: product_sku
+        - name: product_name
+        - name: category_name
+        - name: subcategory_name
+        - name: brand_name
+        - name: parent_company
+        - name: product_price
+        - name: quantity
+        - name: order_value
+        - name: event_action  
+        - name: traffic_channel                       
+        - name: traffic_source
+        - name: occurence
+        - name: activity_repeated_at
+
+      verified: true
+      # tables:
+      #   - icebasedev.retail_accelerator.activity_schema_data
+    fields:
+      - name: activity_uuid
+        type: string
+        description: unique identifier of the activity event
+        column: activity_uuid
+        primary: true
+
+      - name: session_id
+        type: string
+        description: session identifier of the activity event
+        column: session_id
+
+      - name: entity_id
+        type: string
+        description: customer identifier
+        column: entity_id
+
+      - name: activity_ts
+        type: date
+        description: timestamp of the moment when activity_occured
+        column: activity_ts
+
+      - name: product_sku
+        type: string
+        description: product identifier
+        column: product_sku
+
+      - name: product_name
+        type: string
+        description: product name
+        column: product_name
+
+      - name: category_name
+        type: string
+        description: product's category name
+        column: category_name
+
+      - name: subcategory_name
+        type: string
+        description: product's subcategory name
+        column: subcategory_name
+
+      - name: brand_name
+        type: string
+        description: product's brand name
+        column: brand_name
+
+      - name: parent_company
+        type: string
+        description: brand's parent company name
+        column: parent_company
+
+      - name: product_price
+        type: number
+        description: price of the product
+        column: product_price
+
+      - name: quantity
+        type: number
+        description: quantity of the order was placed for
+        column: quantity
+
+      - name: order_value
+        type: number
+        description: sales of order was placed for
+        column: order_value
+
+      - name: event_action
+        type: string
+        column: event_action
+
+      - name: traffic_channel
+        type: string
+        column: traffic_channel
+        
+      - name: traffic_source
+        type: string
+        column: traffic_source
+
+      - name: occurence
+        type: number
+        column: occurence
+
+      - name: activity_repeated_at
+        type: date
+        column: activity_repeated_at
+
+
+    dimensions:
+      - name: duration_in_days
+        sql_snippet: day(current_date - date(${items_added_to_favorite.activity_ts})) 
+        type: number
+        description: number of days of activity from current date
+
+    measures:
+      - name: total_favorited_items
+        sql_snippet: ${items_added_to_favorite.product_sku}
+        type: count
+        description: total number of items was favourited
+
+      - name: total_sessions
+        sql_snippet: ${items_added_to_favorite.session_id}
+        type: count_distinct
+
+
+  - name: items_added_to_cart
+    sql:
+      query: >
+        SELECT 
+          activity_uuid, 
+          session_id,
+          entity_id,
+          activity_ts,         
+          feature2    AS product_sku,
+          feature3    AS product_price,
+          feature4    AS quantity,
+          feature5    AS order_value,
+          feature6    AS event_action,     
+          feature7    AS traffic_channel,                        
+          feature8    AS traffic_source,           
+          product_name,
+          category_name,
+          subcategory_name,
+          brand_name,
+          parent_company,
+          occurence,
+          activity_repeated_at
+        FROM "icebasedev"."retail_accelerator".activity_schema_data AS j
+        JOIN 
+        (
+          WITH pb AS
+          (
+          SELECT 
+          p.sku_id,
+          p.product_category_id,
+          p.product_subcategory_id,
+          p.product_id,
+          p.product_name,
+          p.list_price,
+          p.sale_price,
+          p.launched_ts,
+          p.brand_id,
+          b.brand_name, 
+          b.parent_company
+          FROM icebasedev.retail_accelerator.product AS p
+          LEFT JOIN icebasedev.retail_accelerator.brand AS b
+          ON p.brand_id = b.brand_id
+          ),
+
+          cat_subcat AS
+          (
+          SELECT 
+          pc.product_category_id     AS category_id, 
+          pc.product_category        AS category_name, 
+          psc.product_subcategory_id AS subcategory_id, 
+          psc.product_subcategory    AS subcategory_name
+          FROM icebasedev.retail_accelerator.product_subcategory AS psc 
+          LEFT JOIN  icebasedev.retail_accelerator.product_category AS pc              
+          ON psc.product_category_id =  pc.product_category_id
+          ),
+
+          all AS
+          (
+          SELECT cat_subcat.*, pb.* FROM pb LEFT JOIN cat_subcat ON pb.product_subcategory_id = cat_subcat.subcategory_id
+          )
+          SELECT * FROM all
+
+        ) as k
+
+        ON j.feature2 = k.sku_id
+        WHERE j.activity = 'product_add'
+      columns:
+        - name: activity_uuid
+        - name: session_id
+        - name: entity_id
+        - name: activity_ts
+        - name: product_sku
+        - name: product_name
+        - name: category_name
+        - name: subcategory_name
+        - name: brand_name
+        - name: parent_company
+        - name: product_price
+        - name: quantity
+        - name: order_value
+        - name: event_action  
+        - name: traffic_channel                       
+        - name: traffic_source
+        - name: occurence
+        - name: activity_repeated_at
+
+      verified: true
+      # tables:
+      #   - icebasedev.retail_accelerator.activity_schema_data
+    fields:
+      - name: activity_uuid
+        type: string
+        description: unique identifier of the activity event
+        column: activity_uuid
+        primary: true
+
+      - name: session_id
+        type: string
+        description: session identifier of the activity event
+        column: session_id
+
+      - name: entity_id
+        type: string
+        description: customer identifier
+        column: entity_id
+
+      - name: activity_ts
+        type: date
+        description: timestamp of the moment when activity_occured
+        column: activity_ts
+
+
+      - name: product_sku
+        type: string
+        description: product identifier
+        column: product_sku
+
+      - name: product_name
+        type: string
+        description: product name
+        column: product_name
+
+      - name: category_name
+        type: string
+        description: product's category name
+        column: category_name
+
+      - name: subcategory_name
+        type: string
+        description: product's subcategory name
+        column: subcategory_name
+
+      - name: brand_name
+        type: string
+        description: product's brand name
+        column: brand_name
+
+      - name: parent_company
+        type: string
+        description: brand's parent company name
+        column: parent_company
+
+      - name: product_price
+        type: number
+        description: price of the product
+        column: product_price
+
+      - name: quantity
+        type: number
+        description: quantity of the order was placed for
+        column: quantity
+
+      - name: order_value
+        type: number
+        description: sales of order was placed for
+        column: order_value
+
+      - name: event_action
+        type: string
+        column: event_action
+
+      - name: traffic_channel
+        type: string
+        column: traffic_channel
+        
+      - name: traffic_source
+        type: string
+        column: traffic_source
+
+      - name: occurence
+        type: number
+        column: occurence
+
+      - name: activity_repeated_at
+        type: date
+        column: activity_repeated_at
+
+
+    dimensions:
+      - name: duration_in_days
+        sql_snippet: day(current_date - date(${items_added_to_cart.activity_ts})) 
+        type: number
+        description: number of days of activity from current date
+
+    measures:
+      - name: total_cart_items
+        sql_snippet: ${items_added_to_cart.quantity}
+        type: sum
+        description: total number of items was placed
+
+      - name: total_sessions
+        sql_snippet: ${items_added_to_cart.session_id}
+        type: count_distinct
+
+
+  - name: order_placed
+    sql:
+      query: >
+        SELECT 
+          activity_uuid, 
+          session_id,
+          entity_id,
+          activity_ts,   
+          year(activity_ts) as activity_year,
+          month(activity_ts) as activity_month,
+          feature1    AS transaction_id,               
+          feature2    AS product_sku,
+          feature3    AS product_price,
+          feature4    AS quantity,
+          feature5    AS order_value,
+          feature6    AS event_action,     
+          feature7    AS traffic_channel,                        
+          feature8    AS traffic_source, 
+          product_name,
+          category_name,
+          subcategory_name,
+          brand_name,
+          parent_company,
+          occurence,
+          activity_repeated_at
+        FROM "icebasedev"."retail_accelerator".activity_schema_data AS j
+        JOIN 
+        (
+          WITH pb AS
+          (
+          SELECT 
+          p.sku_id,
+          p.product_category_id,
+          p.product_subcategory_id,
+          p.product_id,
+          p.product_name,
+          p.list_price,
+          p.sale_price,
+          p.launched_ts,
+          p.brand_id,
+          b.brand_name, 
+          b.parent_company
+          FROM icebasedev.retail_accelerator.product AS p
+          LEFT JOIN icebasedev.retail_accelerator.brand AS b
+          ON p.brand_id = b.brand_id
+          ),
+
+          cat_subcat AS
+          (
+          SELECT 
+          pc.product_category_id     AS category_id, 
+          pc.product_category        AS category_name, 
+          psc.product_subcategory_id AS subcategory_id, 
+          psc.product_subcategory    AS subcategory_name
+          FROM icebasedev.retail_accelerator.product_subcategory AS psc 
+          LEFT JOIN  icebasedev.retail_accelerator.product_category AS pc              
+          ON psc.product_category_id =  pc.product_category_id
+          ),
+
+          all AS
+          (
+          SELECT cat_subcat.*, pb.* FROM pb LEFT JOIN cat_subcat ON pb.product_subcategory_id = cat_subcat.subcategory_id
+          )
+          SELECT * FROM all
+
+        ) as k
+
+        ON j.feature2 = k.sku_id
+        WHERE j.activity = 'verify_order'
+
+      columns:
+        - name: activity_uuid
+        - name: session_id
+        - name: entity_id
+        - name: activity_ts
+        - name: activity_year
+        - name: activity_month
+        - name: transaction_id
+        - name: product_sku
+        - name: product_name
+        - name: category_name
+        - name: subcategory_name
+        - name: brand_name
+        - name: parent_company
+        - name: product_price
+        - name: quantity
+        - name: order_value
+        - name: event_action  
+        - name: traffic_channel                       
+        - name: traffic_source
+        - name: occurence
+        - name: activity_repeated_at
+
+      verified: true
+      # tables:
+      #   - icebasedev.retail_accelerator.activity_schema_data
+    fields:
+      - name: activity_uuid
+        type: string
+        description: unique identifier of the activity event
+        column: activity_uuid
+        primary: true
+
+      - name: session_id
+        type: string
+        description: session identifier of the activity event
+        column: session_id
+
+      - name: entity_id
+        type: string
+        description: customer identifier
+        column: entity_id
+
+      - name: activity_ts
+        type: date
+        description: timestamp of the moment when activity_occured
+        column: activity_ts
+
+      - name: activity_year
+        type: number
+        description: year of the moment when activity_occured
+        column: activity_year
+
+      - name: activity_month
+        type: number
+        description: month of the moment when activity_occured
+        column: activity_month
+
+      - name: transaction_id
+        type: string
+        description: transaction identifier
+        column: transaction_id
+
+      - name: product_sku
+        type: string
+        description: product identifier
+        column: product_sku
+
+      - name: product_name
+        type: string
+        description: product name
+        column: product_name
+
+      - name: category_name
+        type: string
+        description: product's category name
+        column: category_name
+
+      - name: subcategory_name
+        type: string
+        description: product's subcategory name
+        column: subcategory_name
+
+      - name: brand_name
+        type: string
+        description: product's brand name
+        column: brand_name
+
+      - name: parent_company
+        type: string
+        description: brand's parent company name
+        column: parent_company
+
+      - name: product_price
+        type: number
+        description: price of the product
+        column: product_price
+
+      - name: quantity
+        type: number
+        description: quantity of the order was placed for
+        column: quantity
+
+      - name: order_value
+        type: number
+        description: sales of order was placed for
+        column: order_value
+
+      - name: event_action
+        type: string
+        column: event_action
+
+      - name: traffic_channel
+        type: string
+        column: traffic_channel
+        
+      - name: traffic_source
+        type: string
+        column: traffic_source
+
+      - name: occurence
+        type: number
+        column: occurence
+
+      - name: activity_repeated_at
+        type: date
+        column: activity_repeated_at
+
+    dimensions:
+      - name: order_no
+        type: string
+        description: unique order_no for a customer
+        sql_snippet: ${order_placed.transaction_id}  #concat(${order_placed.entity_id},'-',split_part(${order_placed.transaction_id},'-',1))
+        hidden: true
+
+      - name: duration_in_days
+        sql_snippet: day(current_date - date(${order_placed.activity_ts})) 
+        type: number
+        description: number of days of activity from current date
+
+    measures:
+      - name: total_sessions
+        sql_snippet: ${order_placed.session_id}
+        type: count_distinct
+
+      - name: recency
+        sql_snippet: day(current_date - ${order_placed.activity_ts})
+        type: min
+        description: days since last order was placed
+
+      - name: frequency
+        sql_snippet: ${order_placed.order_no}
+        type: count_distinct
+        description: count of total activities
+
+      - name: monetary
+        sql_snippet: round(sum(${order_placed.order_value}),2)
+        type: number
+        description: total order value
+
+
+  - name: segment
+    sql:
+      query: >
+        SELECT b.segment_id, a.name, b.customer_id, b.ts
+        FROM "lensdb"."public".segment AS a
+        RIGHT JOIN "icebase"."audience_segment".segment_stream AS b
+        ON cast(a.guid AS varchar) = b.segment_id 
+        WHERE name IN ( 'Denim Loyal Customers', 'High Spending Customers')
+        AND b.ts >= current_date - interval '1' day
+
+        UNION ALL
+
+        SELECT * FROM(
+        SELECT b.segment_id, a.name, b.customer_id, b.ts
+        FROM "lensdb"."public".segment AS a
+        RIGHT JOIN "icebase"."audience_segment".segment_stream AS b
+        ON cast(a.guid AS varchar) = b.segment_id
+        WHERE name = 'Customers who are expecting a Baby'
+        AND b.ts >= current_date - interval '1' day
+        ORDER BY ts desc
+        LIMIT 1
+        )
+    
+      columns:
+        - name: segment_id
+        - name: name        
+        - name: customer_id
+      verified: true
+      # tables:
+      #   - icebasedev.retail_accelerator.activity_schema_data
+    fields:
+      - name: segment_id
+        type: string
+        description: unique identifier of the segment
+        column: segment_id
+        primary: true
+
+      - name: segment_name
+        type: string
+        description: name of the segment
+        column: name
+
+      - name: customer_id
+        type: string
+        description: unique identifier of the customer
+        column: customer_id
+
+    measures:
+      - name: total_segmented_customer
+        sql_snippet: ${segment.customer_id}
+        type: count
+        hidden: false
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
