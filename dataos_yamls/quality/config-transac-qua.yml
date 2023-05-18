@@ -1,0 +1,90 @@
+version: v1
+name: wf-quality-transaction
+type: workflow
+tags:
+  - demo.customer
+description: The job performs metrics calculations and checks on transaction data
+workflow:
+  title: Metrics and checks
+  dag:
+    - name: quality-transaction
+      title: Metrics and checks
+      description: The job performs metrics calculations and checks on transaction data
+      spec:
+        stack: flare:3.0
+        compute: runnable-default
+        tags:
+          - Metrics
+        title: Metrics and checks
+        description: The job performs metrics calculations and checks on transaction data
+        flare:
+          job:
+            explain: true
+            logLevel: INFO
+            inputs:
+              - name: source
+                dataset:  dataos://postgres:retail_accelerator/transaction
+                driver: org.postgresql.Driver
+                format: jdbc
+                options:  
+                 driver: org.postgresql.Driver
+
+            assertions:
+              - column: transaction_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: order_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: customer_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              # - column: transaction_date
+              #   validFormat: 
+              #     regex: ((((19|20)([2468][048]|[13579][26]|0[48])|2000)-02-29|((19|20)[0-9]{2}-(0[4678]|1[02])-(0[1-9]|[12][0-9]|30)|(19|20)[0-9]{2}-(0[1359]|11)-(0[1-9]|[12][0-9]|3[01])|(19|20)[0-9]{2}-02-(0[1-9]|1[0-9]|2[0-8])))\s([01][0-9]|2[0-3]):([012345][0-9]):([012345][0-9]))
+              #   tests:
+              #     - missing_percentage == 0
+              #     - missing_count <= 0
+              #     - transaction_date < currentdate
+
+              - column: transaction_amount
+                validFormat: 
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: transaction_type
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests: 
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: payment_method
+                validFormat: 
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+                                         
+              - column: transaction_status
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0

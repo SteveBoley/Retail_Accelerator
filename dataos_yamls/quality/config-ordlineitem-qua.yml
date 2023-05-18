@@ -1,0 +1,88 @@
+version: v1
+name: wf-quality-order-line-item
+type: workflow
+tags:
+  - demo.customer
+description: The job performs metrics calculations and checks on order line item data
+workflow:
+  title: Metrics and checks
+  dag:
+    - name: quality-orders
+      title: Metrics and checks
+      description: The job performs metrics calculations and checks on order line item data
+      spec:
+        stack: flare:3.0
+        compute: runnable-default
+        tags:
+          - Metrics
+        title: Metrics and checks
+        description: The job performs metrics calculations and checks on order line item data
+        flare:
+          job:
+            explain: true
+            logLevel: INFO
+            inputs:
+              - name: source
+                dataset:  dataos://postgres:retail_accelerator/order_line_item
+                driver: org.postgresql.Driver
+                format: jdbc
+                options:
+                  driver: org.postgresql.Driver
+                 
+            assertions:
+              - column: order_id
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - duplicate_count == 0
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_sku
+                validFormat:
+                  regex: ^[a-zA-Z0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: product_price
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: item_quantity
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: order_total
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: discounted_amount
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: shipping_amount
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
+
+              - column: total_price
+                validFormat:
+                  regex: ^[0-9_.-]*$
+                tests:
+                  - missing_percentage == 0
+                  - missing_count <= 0
